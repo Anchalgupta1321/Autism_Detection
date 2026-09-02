@@ -1,0 +1,66 @@
+﻿# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Python Virtual Environments
+venv/
+.venv/
+ENV/
+env/
+env.bak/
+venv.bak/
+autism_web/venv/
+Include/
+Lib/
+Scripts/
+pyvenv.cfg
+
+# Flask session and temporary uploads
+autism_web/flask_session_data/*
+!autism_web/flask_session_data/.gitkeep
+autism_web/uploads/*
+!autism_web/uploads/.gitkeep
+
+# Sensitive environment files
+.env
+.env.local
+*.env
+
+# Large archives (exceeding GitHub 100MB limit)
+*.zip
+*.tar.gz
+*.rar
+
+# Operating System & IDE files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+[Dd]esktop.ini
+.idea/
+.vscode/
+*.swp
+*.swo

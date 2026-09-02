@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoDetect AI – Video Assessment</title>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: url('https://www.transparenttextures.com/patterns/paper-fibers.png') repeat, linear-gradient(to bottom right, #e6f5ff, #f3fcff);
+            background-blend-mode: overlay;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #333;
+        }
+        .container {
+            max-width: 700px;
+            margin: auto;
+            background: #fff;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 100%;
+            animation: fadeIn 1s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+        p {
+            font-size: 1.05em;
+            color: #555;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+        .warning-message {
+            color: #d32f2f;
+            background-color: #ffe0e0;
+            border: 1px solid #ef9a9a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        form {
+            text-align: left;
+            margin-top: 30px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #444;
+            font-size: 1.1em;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 1em;
+            box-sizing: border-box;
+            background-color: #f8f8f8;
+            cursor: pointer;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        input[type="file"]:hover {
+            border-color: #00aaff;
+        }
+        input[type="file"]:focus {
+            border-color: #00aaff;
+            box-shadow: 0 0 5px rgba(0, 170, 255, 0.3);
+            outline: none;
+        }
+
+        .button {
+            display: block; /* Make button full width */
+            background-color: #28a745; /* Green upload button */
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 184, 148, 0.2);
+            margin-top: 30px;
+        }
+        .button:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 184, 148, 0.3);
+        }
+        .button:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 10px rgba(0, 184, 148, 0.2);
+        }
+
+        .back-button {
+            background-color: #6c757d; /* Grey button */
+            margin-top: 20px;
+        }
+        .back-button:hover {
+            background-color: #5a6268;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .container {
+                padding: 30px 20px;
+            }
+            h1 {
+                font-size: 2em;
+            }
+            p {
+                font-size: 0.95em;
+            }
+            .button {
+                padding: 12px 20px;
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Video Assessment for {{ child_name }}</h1>
+        <p>
+            To provide a more comprehensive insight, please upload a short video of your child. This helps us observe interactions and behaviors that might not be captured in the questionnaire.
+        </p>
+        <p>
+            Please ensure the video is **1 minute maximum** and clearly shows your child in a natural setting (e.g., playing, interacting).
+        </p>
+        <p class="warning-message" id="uploadMessage" style="display:none;">
+            {{ upload_message | default('') }}
+        </p>
+
+        <form method="POST" action="/upload-video" enctype="multipart/form-data" onsubmit="return validateVideoForm()">
+            {% for key, value in request.form.items() %}
+                <input type="hidden" name="{{ key }}" value="{{ value }}">
+            {% endfor %}
+
+            <label for="video_file">Select Video File:</label>
+            <input type="file" id="video_file" name="video_file" accept="video/mp4,video/avi,video/mov,video/mkv" required>
+            
+            <button type="submit" class="button">Upload Video</button>
+            <a href="{{ url_for('submit_assessment') }}" class="button back-button">No Thanks, Return to Results</a>
+        </form>
+    </div>
+
+    <script>
+        const MAX_FILE_SIZE_BYTES = 100 * 1024 * 1024; // 100 MB, matches Flask config
+        const ALLOWED_EXTENSIONS_JS = ['.mp4', '.avi', '.mov', '.mkv'];
+
+        function validateVideoForm() {
+            const fileInput = document.getElementById('video_file');
+            const file = fileInput.files[0];
+            const uploadMessageDiv = document.getElementById('uploadMessage');
+            uploadMessageDiv.style.display = 'none'; // Hide previous messages
+
+            if (!file) {
+                uploadMessageDiv.textContent = "Please select a file to upload.";
+                uploadMessageDiv.style.display = 'block';
+                return false;
+            }
+
+            // Check file type
+            const fileName = file.name.toLowerCase();
+            const fileExtension = '.' + fileName.split('.').pop();
+            if (!ALLOWED_EXTENSIONS_JS.includes(fileExtension)) {
+                uploadMessageDiv.textContent = "Invalid file type. Please upload MP4, AVI, MOV, or MKV.";
+                uploadMessageDiv.style.display = 'block';
+                return false;
+            }
+
+            // Check file size
+            if (file.size > MAX_FILE_SIZE_BYTES) {
+                uploadMessageDiv.textContent = `File is too large. Max size is ${MAX_FILE_SIZE_BYTES / (1024 * 1024)} MB.`;
+                uploadMessageDiv.style.display = 'block';
+                return false;
+            }
+
+            // Note: Validating video duration (1 minute max) precisely on client-side
+            // requires reading the video metadata, which is complex and not reliably cross-browser.
+            // Server-side validation after upload is more robust for duration.
+            // You might add a warning here for the user to keep video short.
+
+            return true; // Allow form submission
+        }
+
+        // Display messages passed from Flask after upload attempt
+        window.onload = function() {
+            const uploadMessageText = "{{ upload_message | default('') }}";
+            const uploadMessageDiv = document.getElementById('uploadMessage');
+            if (uploadMessageText) {
+                uploadMessageDiv.textContent = uploadMessageText;
+                uploadMessageDiv.style.display = 'block';
+                // Adjust color for success messages
+                if (uploadMessageText.includes("successfully")) {
+                    uploadMessageDiv.style.backgroundColor = '#d4edda';
+                    uploadMessageDiv.style.borderColor = '#28a745';
+                    uploadMessageDiv.style.color = '#155724';
+                }
+            }
+        };
+    </script>
+</body>
+</html>

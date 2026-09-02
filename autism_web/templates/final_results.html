@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoDetect AI – Comprehensive Assessment Results</title>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: url('https://www.transparenttextures.com/patterns/paper-fibers.png') repeat, linear-gradient(to bottom right, #e6f5ff, #f3fcff);
+            background-blend-mode: overlay;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #333;
+        }
+        .container {
+            max-width: 900px; /* Wider for more content */
+            margin: auto;
+            background: #fff;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 100%;
+            animation: fadeIn 1s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+        h2 {
+            color: #34495e;
+            font-size: 1.8em;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        h3 {
+            color: #555;
+            font-size: 1.2em;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .result-display {
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 30px;
+            margin-bottom: 40px;
+            font-size: 1.3em;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+        /* Styling based on final_prediction */
+        .result-display.high-likelihood {
+            background-color: #ffe0e0; /* Light red */
+            border: 1px solid #ef9a9a;
+            color: #d32f2f; /* Dark red */
+        }
+        .result-display.low-likelihood {
+            background-color: #fffde7; /* Light yellow */
+            border: 1px solid #ffe082;
+            color: #f57f17; /* Dark orange */
+        }
+        .result-display.no-likelihood {
+            background-color: #e8f5e9; /* Light green */
+            border: 1px solid #a5d6a7;
+            color: #2e7d32; /* Dark green */
+        }
+        .result-display strong {
+            font-size: 2em;
+            display: block;
+            margin-top: 10px;
+        }
+
+        .section-details {
+            background-color: #f8fbfd;
+            border: 1px solid #e0eaf0;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+        .section-details p {
+            font-size: 0.95em;
+            margin-bottom: 10px;
+        }
+        .section-details strong {
+            color: #2c3e50;
+        }
+        .section-details ul {
+            list-style: none; /* Remove default bullet points */
+            padding: 0;
+        }
+        .section-details li {
+            background-color: #ffffff;
+            border: 1px solid #f0f0f0;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .section-details li strong {
+            display: block;
+            margin-bottom: 5px;
+            color: #007bff; /* Highlight question */
+        }
+        .reasoning-text {
+            font-style: italic;
+            color: #666;
+            margin-top: 5px;
+            font-size: 0.9em;
+        }
+
+        .disclaimer {
+            background-color: #fff3e0;
+            border: 1px solid #ffcc80;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: left;
+            font-size: 0.95em;
+            color: #e65100;
+            line-height: 1.6;
+            margin-top: 40px;
+            margin-bottom: 30px;
+        }
+        .disclaimer h3 {
+            color: #e65100;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+        .disclaimer strong {
+            color: #d84315;
+        }
+
+        .button {
+            display: inline-block;
+            background-color: #007bff;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+            margin-top: 20px;
+        }
+        .button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 123, 255, 0.3);
+        }
+        .button:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .container {
+                padding: 30px 20px;
+            }
+            h1 {
+                font-size: 2em;
+            }
+            h2 {
+                font-size: 1.5em;
+            }
+            h3 {
+                font-size: 1.1em;
+            }
+            .result-display p {
+                font-size: 1.1em;
+            }
+            .result-display strong {
+                font-size: 1.5em;
+            }
+            .section-details p, .reasoning-text {
+                font-size: 0.85em;
+            }
+            .section-details li {
+                padding: 10px;
+            }
+            .section-details li strong {
+                font-size: 1em;
+            }
+            .disclaimer {
+                font-size: 0.85em;
+            }
+            .button {
+                padding: 12px 20px;
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Comprehensive Assessment Results for {{ child_name }}</h1>
+        <p>Hello {{ parent_name }}, here's the combined insight from the questionnaire and video analysis:</p>
+
+        <div class="result-display 
+            {% if final_prediction == 'High Likelihood' %}high-likelihood
+            {% elif final_prediction == 'Low Likelihood' %}low-likelihood
+            {% else %}no-likelihood{% endif %}">
+            <p>Based on all submitted data, your child's likelihood of exhibiting signs consistent with ASD is: <br> <strong>{{ final_prediction }}</strong></p>
+        </div>
+
+        <h2>Why this is the answer:</h2>
+
+        <div class="section-details">
+            <h3>Video Analysis Insights</h3>
+            <p>
+		Our conceptual video analysis indicates:
+		<strong style="color: {{ 'red' if video_analysis_outcome == 'ASD' else 'green' }};">
+		    {{ video_analysis_outcome }}
+		</strong>
+	    </p>
+	    <p>
+		Confidence Score from video: 
+		<strong>{{ (combined_score - final_red_flags_count) | round(2) }}/10</stron
+	    </p>
+	    <p class="reasoning-text">{{ video_analysis_reason }}</p>
+	    <p style="margin-top: 1em; font-style: italic;">
+		Final Prediction = {{ final_red_flags_count }} (questionnaire) + {{ (combined_score - final_red_flags_count) | round(2) }} (video) = {{ combined_score | round(2) }}.
+		<br>
+		Since this is {% if combined_score >= 18 %}≥ 18, classified as <strong>High Likelihood</strong>{% elif combined_score >= 8 %}≥ 8, classified as <strong>Low Likelihood</strong>{% else %}< 8, classified as <strong>No Likelihood</strong>{% endif %}.
+	    </p>
+	    <p><em>(Note: In a real-world application, this section would provide specific observations from a sophisticated AI video analysis module.)</em></p>
+        </div>
+
+        <div class="section-details">
+            <h3>Questionnaire Analysis ({{ final_red_flags_count }} Red Flags Identified)</h3>
+            {% if flagged_questions %}
+                <p>The following responses were identified as potential **"Red Flags"**: </p>
+                <ul>
+                    {% for flagged_q in flagged_questions %}
+                        <li>
+                            <strong>{{ flagged_q.question_text }}</strong>
+                            <p>Your Answer: "{{ flagged_q.user_answer | capitalize }}"</p>
+                            <p class="reasoning-text">Reasoning: {{ flagged_q.red_flag_reasoning }}</p>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No specific "Red Flags" were identified in the questionnaire responses.</p>
+            {% endif %}
+        </div>
+
+        <div class="disclaimer">
+            <h3>Important Disclaimer:</h3>
+            <p>
+                Please remember that <strong>AutoDetect AI is a screening tool only</strong> and is not capable of providing a medical diagnosis.
+                Autism Spectrum Disorder can only be diagnosed by qualified healthcare professionals (e.g., developmental pediatricians, child psychologists, neurologists).
+            </p>
+            <p>
+                Regardless of this assessment's outcome, if you have any concerns about your child's development, we strongly recommend that you consult with your child's pediatrician or a developmental specialist for a comprehensive evaluation. Early intervention can make a significant difference.
+            </p>
+            <p>
+                We appreciate your participation and dedication to your child's well-being.
+            </p>
+        <div class="button-group">
+            <a href="{{ url_for('thank_you_page', child_name=child_name, parent_email=parent_email, parent_name=parent_name) }}" class="button">Finish & View Support Options</a>
+        </div>
+    </div>
+</body>
+</html>

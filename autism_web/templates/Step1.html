@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoDetect AI – Social Interaction and Communication</title>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: url('https://www.transparenttextures.com/patterns/paper-fibers.png') repeat, linear-gradient(to bottom right, #e6f5ff, #f3fcff);
+            background-blend-mode: overlay;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #fff;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 100%;
+            animation: fadeIn 1s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 40px;
+            overflow: hidden;
+            height: 12px;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 20%; /* 1 out of 5 steps = 20% */
+            background-color: #00b894; /* Green */
+            border-radius: 10px;
+            color: white;
+            transition: width 0.5s ease-in-out;
+        }
+
+        .progress-text {
+            position: absolute;
+            width: 100%;
+            top: 0;
+            left: 0;
+            font-size: 0.8em;
+            font-weight: 600;
+            line-height: 12px;
+            color: #333;
+            text-align: center;
+            user-select: none;
+        }
+
+        form {
+            text-align: left;
+        }
+
+        .question-group {
+            margin-bottom: 25px;
+            border: 1px solid #f0f0f0;
+            border-radius: 10px;
+            padding: 20px;
+            background-color: #fdfdfd;
+            transition: box-shadow 0.3s ease, transform 0.3s ease;
+        }
+
+        .question-group:hover {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transform: translateY(-3px);
+        }
+
+        .question-group label {
+            display: block;
+            margin-bottom: 15px;
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1em;
+            line-height: 1.4;
+        }
+
+        .question-group select {
+            width: 100%;
+            padding: 12px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 1em;
+            box-sizing: border-box;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007bff%22%20d%3D%22M287%2069.9a14.7%2014.7%200%200%200-20.8%200L146.2%20190.3%2026.3%2069.9A14.7%2014.7%200%200%200%205.5%2090.7l128.8%20128.8c5.7%205.7%2014.8%205.7%2020.5%200L287%2090.7a14.7%2014.7%200%200%200%200-20.8z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 12px;
+            cursor: pointer;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+        }
+
+        .question-group select:hover {
+            transform: scale(1.005);
+        }
+
+        .question-group select:focus {
+            border-color: #00aaff;
+            box-shadow: 0 0 8px rgba(0, 170, 255, 0.4);
+            outline: none;
+            transform: scale(1.005);
+        }
+
+        input[type="submit"] {
+            margin-top: 30px;
+            background-color: #00b894;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 184, 148, 0.2);
+        }
+
+        input[type="submit"]:hover {
+            background-color: #009f7a;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 184, 148, 0.3);
+        }
+
+        input[type="submit"]:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 10px rgba(0, 184, 148, 0.2);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .container {
+                padding: 30px 20px;
+            }
+            h1 {
+                font-size: 2em;
+            }
+            .progress-bar-container {
+                margin-bottom: 30px;
+            }
+            .question-group {
+                padding: 15px;
+            }
+            .question-group label {
+                font-size: 1em;
+            }
+            input[type="submit"] {
+                padding: 12px 20px;
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Social Interaction and Communication</h1>
+
+        <div class="progress-bar-container">
+            <div class="progress-bar" style="width: 20%;"></div>
+            <div class="progress-text">Step 1 of 5</div>
+        </div>
+
+        <form id="questionnaire-form">
+            <input type="hidden" name="child_name" value="{{ child_name }}">
+            <input type="hidden" name="age" value="{{ age }}">
+            <input type="hidden" name="gender" value="{{ gender }}">
+            <input type="hidden" name="parent_name" value="{{ parent_name }}">
+            <input type="hidden" name="parent_email" value="{{ parent_email }}">
+
+            <div class="question-group">
+                <label for="q_point_look">1. 👉 If you point at something across the room (e.g., a toy or an animal), does your child look at it?</label>
+                <select name="q_point_look" id="q_point_look" required data-red-flag="no">
+                    <option value="">-- Select --</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                </select>
+            </div>
+
+            <div class="question-group">
+                <label for="q_respond_name">2. 👂 Does your child respond (e.g., look up, babble, talk, or stop what they're doing) when you call their name?</label>
+                <select name="q_respond_name" id="q_respond_name" required data-red-flag="no">
+                    <option value="">-- Select --</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                </select>
+            </div>
+
+            <div class="question-group">
+                <label for="q_smile_back">3. 😊 When you smile at your child, does he or she smile back at you?</label>
+                <select name="q_smile_back" id="q_smile_back" required data-red-flag="no">
+                    <option value="">-- Select --</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                </select>
+            </div>
+
+            <div class="question-group">
+                <label for="q_eye_contact">4. 👀 Does your child look you in the eye when you are talking, playing, or dressing them?</label>
+                <select name="q_eye_contact" id="q_eye_contact" required data-red-flag="no">
+                    <option value="">-- Select --</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                </select>
+            </div>
+
+            <div class="question-group">
+                <label for="q_interested_peers">5. 👧👦 Is your child interested in other children (e.g., do they watch other children, smile at them, or go to them)?</label>
+                <select name="q_interested_peers" id="q_interested_peers" required data-red-flag="no">
+                    <option value="">-- Select --</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                </select>
+            </div>
+
+            <div class="question-group">
+                <label for="q_show_to_share">6. 🤝 Does your child show you things by bringing them to you or holding them up just to share (not to get help)?</label>
+                <select name="q_show_to_share" id="q_show_to_share" required data-red-flag="no">
+                    <option value="">-- Select --</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                </select>
+            </div>
+
+            <div class="question-group">
+                <label for="q_follow_gaze">7. 🧑‍If you turn your head to look at something, does your child look around to see what you are looking at?</label>
+                <select name="q_follow_gaze" id="q_follow_gaze" required data-red-flag="no">
+                    <option value="">-- Select --</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                </select>
+            </div>
+
+            <div class="question-group">
+                <label for="q_get_attention">8. 🌟 Does your child try to get you to watch them (e.g., looking at you for praise, or saying "look" or "watch me")?</label>
+                <select name="q_get_attention" id="q_get_attention" required data-red-flag="no">
+                    <option value="">-- Select --</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                </select>
+            </div>
+
+            <div class="question-group">
+                <label for="q_social_referencing">9. 🤔 If something new happens, does your child look at your face to see how you feel about it (e.g., if they hear a strange noise or see a new toy)?</label>
+                <select name="q_social_referencing" id="q_social_referencing" required data-red-flag="no">
+                    <option value="">-- Select --</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                </select>
+            </div>
+
+            <div class="question-group">
+                <label for="q_point_request">10. 🤏 Does your child use their index finger to point to ask for something or to get help (e.g., pointing to a snack out of reach)?</label>
+                <select name="q_point_request" id="q_point_request" required data-red-flag="no">
+                    <option value="">-- Select --</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                </select>
+            </div>
+
+            <div class="question-group">
+                <label for="q_point_show">11. ✨ Does your child use their index finger to point to show you something interesting (e.g., an airplane in the sky)?</label>
+                <select name="q_point_show" id="q_point_show" required data-red-flag="no">
+                    <option value="">-- Select --</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                </select>
+            </div>
+
+            <div class="question-group">
+                <label for="q_imitate_wave_clap">12. 👋 Does your child wave "bye-bye" or clap hands to imitate you?</label>
+                <select name="q_imitate_wave_clap" id="q_imitate_wave_clap" required data-red-flag="no">
+                    <option value="">-- Select --</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                </select>
+            </div>
+
+            <div class="question-group">
+                <label for="q_8_words">13. 🗣️ Does your child use at least 8 words in addition to "Mama" and "Dada"?</label>
+                <select name="q_8_words" id="q_8_words" required data-red-flag="no">
+                    <option value="">-- Select --</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                </select>
+            </div>
+
+            <div class="question-group">
+                <label for="q_follow_instructions">14. 🧠 Can your child follow simple instructions without you pointing or gesturing (e.g., "Put the book on the chair")?</label>
+                <select name="q_follow_instructions" id="q_follow_instructions" required data-red-flag="no">
+                    <option value="">-- Select --</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                </select>
+            </div>
+
+            <div class="question-group">
+                <label for="q_to_and_fro_conv">15. 💬 Does your child have a "to and fro" conversation that involves taking turns or building on what you've said?</label>
+                <select name="q_to_and_fro_conv" id="q_to_and_fro_conv" required data-red-flag="no">
+                    <option value="">-- Select --</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                </select>
+            </div>
+
+            <div class="question-group">
+                <label for="q_echolalia">16. 🔄 Does your child often repeat words or phrases exactly as they hear them (e.g., repeating a question you asked)?</label>
+                <select name="q_echolalia" id="q_echolalia" required data-red-flag="yes">
+                    <option value="">-- Select --</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                </select>
+            </div>
+
+            <input type="submit" value="Next">
+        </form>
+    </div>
+    
+    <script>
+        document.getElementById('questionnaire-form').addEventListener('submit', async function (e) {
+            e.preventDefault(); // prevent default form submission
+
+            const form = e.target;
+            const formData = new FormData(form);
+            const jsonData = {};
+
+            formData.forEach((value, key) => {
+                jsonData[key] = value;
+            });
+
+            try {
+                const response = await fetch('/submit-step/1', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(jsonData)
+            });
+            const result = await response.json(); // Always try to parse JSON for more detailed error messages
+
+
+            if (response.ok) { // Check for HTTP status 200-299
+                if (result.status === 'ok') {
+                    // Redirect to the URL provided by the Flask response
+                    window.location.href = result.redirect_url;
+                } else {
+                    // This handles cases where Flask returns status: 'error' with a 200 OK
+                    alert(`127.0.0.1:5000 says\nFailed to submit. Please try again. (Server error: ${result.message})`);
+                }
+            } else {
+                // This handles non-200 HTTP status codes (e.g., 400, 500)
+                const errorMessage = result.message || response.statusText || 'Unknown error';
+                alert(`127.0.0.1:5000 says\nFailed to submit. Please try again. (HTTP Error: ${response.status} - ${errorMessage})`);
+            }
+       } catch (error) {
+           console.error('Submission error:', error)
+           // More detailed alert for network/JS errors
+           alert('127.0.0.1:5000 says\nSomething went wrong. Please check your internet connection or try again later.');   
+       }      
+    });
+    document.addEventListener('DOMContentLoaded', () => {
+       const form = document.getElementById('questionnaire-form');
+       if (form) {
+           // The 'all_answers' object is passed from Flask
+           const allAnswers = {{ all_answers | tojson }}; // Use tojson filter for safe JSON embedding
+
+           for (const key in allAnswers) {
+               const element = form.elements[key];
+               if (element && element.tagName === 'SELECT') { // Only for select elements for now
+                   element.value = allAnswers[key];
+               }   
+          }
+      }
+     });
+    </script>
+</body>
+</html>

@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoDetect AI – Play and Imagination (Step 2/5)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: url('https://www.transparenttextures.com/patterns/paper-fibers.png') repeat, linear-gradient(to bottom right, #e6f5ff, #f3fcff);
+            background-blend-mode: overlay;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #333;
+        }
+        .container {
+            max-width: 800px; /* Wider to accommodate more questions */
+            margin: auto;
+            background: #fff;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 100%;
+            animation: fadeIn 1s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 40px;
+            overflow: hidden;
+            height: 12px;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 40%; /* 2 out of 5 steps = 40% */
+            background-color: #00b894; /* Green */
+            border-radius: 10px;
+            color: white;
+            transition: width 0.5s ease-in-out;
+        }
+
+        .progress-text {
+            position: absolute;
+            width: 100%;
+            top: 0;
+            left: 0;
+            font-size: 0.8em;
+            font-weight: 600;
+            line-height: 12px;
+            color: #333;
+            text-align: center;
+            user-select: none;
+        }
+
+        form {
+            text-align: left;
+        }
+
+        .question-group {
+            margin-bottom: 25px;
+            border: 1px solid #f0f0f0;
+            border-radius: 10px;
+            padding: 20px;
+            background-color: #fdfdfd;
+            transition: box-shadow 0.3s ease, transform 0.3s ease;
+        }
+
+        .question-group:hover {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transform: translateY(-3px);
+        }
+
+        .question-group label {
+            display: block;
+            margin-bottom: 15px;
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1em;
+            line-height: 1.4;
+        }
+
+        .question-group select {
+            width: 100%;
+            padding: 12px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 1em;
+            box-sizing: border-box;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007bff%22%20d%3D%22M287%2069.9a14.7%2014.7%200%200%200-20.8%200L146.2%20190.3%2026.3%2069.9A14.7%2014.7%200%200%200%205.5%2090.7l128.8%20128.8c5.7%205.7%2014.8%205.7%2020.5%200L287%2090.7a14.7%2014.7%200%200%200%200-20.8z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 12px;
+            cursor: pointer;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+        }
+
+        .question-group select:hover {
+            transform: scale(1.005);
+        }
+
+        .question-group select:focus {
+            border-color: #00aaff;
+            box-shadow: 0 0 8px rgba(0, 170, 255, 0.4);
+            outline: none;
+            transform: scale(1.005);
+        }
+
+        input[type="submit"] {
+            margin-top: 30px;
+            background-color: #00b894;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 184, 148, 0.2);
+        }
+
+        input[type="submit"]:hover {
+            background-color: #009f7a;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 184, 148, 0.3);
+        }
+
+        input[type="submit"]:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 10px rgba(0, 184, 148, 0.2);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .container {
+                padding: 30px 20px;
+            }
+            h1 {
+                font-size: 2em;
+            }
+            .progress-bar-container {
+                margin-bottom: 30px;
+            }
+            .question-group {
+                padding: 15px;
+            }
+            .question-group label {
+                font-size: 1em;
+            }
+            input[type="submit"] {
+                padding: 12px 20px;
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Play and Imagination</h1>
+
+        <div class="progress-bar-container">
+            <div class="progress-bar" style="width: 40%;"></div>
+            <div class="progress-text">Step 2 of 5</div>
+        </div>
+
+        <form id="questionnaire-form">
+            <input type="hidden" name="child_name" value="{{ all_answers.child_name  }}">
+            <input type="hidden" name="age" value="{{ all_answers.age }}">
+            <input type="hidden" name="gender" value="{{ all_answers.gender }}">
+            <input type="hidden" name="parent_name" value="{{ all_answers.parent_name }}">
+            <input type="hidden" name="parent_email" value="{{ all_answers.parent_email }}">
+            <input type="hidden" name="q1_social_interact" value="{{ all_answers.q1_social_interact }}">
+            <input type="hidden" name="q2_respond_name" value="{{ all_answers.q2_respond_name }}">
+            <input type="hidden" name="q3_smile_back" value="{{ all_answers.q3_smile_back }}">
+            <input type="hidden" name="q4_eye_contact" value="{{ all_answers.q4_eye_contact }}">
+            <input type="hidden" name="q5_interested_peers" value="{{ all_answers.q5_interested_peers }}">
+            <input type="hidden" name="q6_show_to_share" value="{{ all_answers.q6_show_to_share }}">
+            <input type="hidden" name="q7_follow_gaze" value="{{ all_answers.q7_follow_gaze }}">
+            <input type="hidden" name="q8_get_attention" value="{{ all_answers.q8_get_attention }}">
+            <input type="hidden" name="q9_social_referencing" value="{{ all_answers.q9_social_referencing }}">
+            <input type="hidden" name="q10_point_request" value="{{ all_answers.q10_point_request }}">
+            <input type="hidden" name="q11_point_show" value="{{ all_answers.q11_point_show }}">
+            <input type="hidden" name="q12_imitate_wave_clap" value="{{ all_answers.q12_imitate_wave_clap }}">
+            <input type="hidden" name="q13_8_words" value="{{ all_answers.q13_8_words }}">
+            <input type="hidden" name="q14_follow_instructions" value="{{ all_answers.q14_follow_instructions }}">
+            <input type="hidden" name="q15_to_and_fro_conv" value="{{ all_answers.q15_to_and_fro_conv }}">
+            <input type="hidden" name="q16_echolalia" value="{{ all_answers.q16_echolalia }}">
+
+
+            <div class="question-group">
+                <label for="p_play_pretend">1. 🎭 Does your child play pretend or make-believe (e.g., pretending to drink from an empty cup, talking on a phone, or feeding a doll)?</label>
+                <select name="p_play_pretend" id="p_play_pretend" required data-red-flag="no">
+                    <option value="">-- Select --</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                </select>
+            </div>
+
+            <div class="question-group">
+                <label for="p_play_small_toys">2. 🧩 Can your child play properly with small toys (e.g., cars or blocks) without just mouthing, fiddling, or dropping them?</label>
+                <select name="p_play_small_toys" id="p_play_small_toys" required data-red-flag="no">
+                    <option value="">-- Select --</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                </select>
+            </div>
+
+            <div class="question-group">
+                <label for="p_copy_you">3. 👯 Does your child try to copy what you do (e.g., pretend to vacuum, sweep, or shave)?</label>
+                <select name="p_copy_you" id="p_copy_you" required data-red-flag="no">
+                    <option value="">-- Select --</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                </select>
+            </div>
+
+            <div class="question-group">
+                <label for="p_play_doll">4. 🧸 When playing with a stuffed animal or doll, does your child pretend to rock it, feed it, or put it to bed?</label>
+                <select name="p_play_doll" id="p_play_doll" required data-red-flag="no">
+                    <option value="">-- Select --</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                </select>
+            </div>
+
+            <div class="question-group">
+                <label for="p_play_imaginatively_others">5. 🧑‍🤝‍🧑 Does your child play imaginatively with other children, and engage in role-play?</label>
+                <select name="p_play_imaginatively_others" id="p_play_imaginatively_others" required data-red-flag="no">
+                    <option value="">-- Select --</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                </select>
+            </div>
+
+            <input type="submit" value="Next">
+        </form>
+    </div>
+    <script>
+        document.getElementById('questionnaire-form').addEventListener('submit', async function (e) {
+	    e.preventDefault();
+            const formData = new FormData(e.target);
+            const jsonData = {};
+	    formData.forEach((value, key) => {
+                jsonData[key] = value;
+            });
+
+            try {
+                const response = await fetch('/submit-step/2', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(jsonData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.status === 'ok') {            
+                    window.location.href = result.redirect_url;
+                } else {
+                    alert("Submission failed. Server said: " + (result.message || "Unknown error"));
+		}
+            } catch (err) {
+                console.error('Submit error:', err);
+                alert("Failed to submit. Check connection or try again.");
+            }
+        });
+
+	document.addEventListener('DOMContentLoaded', () => {
+	    const form = document.getElementById('questionnaire-form');
+	    const allAnswers = {{ all_answers | tojson }};
+	    for (const key in allAnswers) {
+		const el = form.elements[key];
+		if (el && el.tagName === 'SELECT') {
+		    el.value = allAnswers[key];
+		}
+	    }
+	});
+    </script>
+</body>
+</html>

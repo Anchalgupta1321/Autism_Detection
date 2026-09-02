@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoDetect AI – Questionnaire Results</title>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* General Body and Container Styling */
+        body {
+            font-family: 'Open Sans', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: url('https://www.transparenttextures.com/patterns/paper-fibers.png') repeat, linear-gradient(to bottom right, #e6f5ff, #f3fcff);
+            background-blend-mode: overlay;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: #fff;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 100%;
+            animation: fadeIn 1s ease-out;
+            border-top: 5px solid #00b894; /* A nice border to signify completion */
+        }
+
+        /* Fade-in Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Headings and Paragraphs */
+        h1 {
+            color: #2c3e50;
+            font-size: 2.8em;
+            margin-bottom: 20px;
+            font-weight: 700;
+            text-align: center;
+        }
+        h2 {
+            color: #34495e;
+            font-size: 1.8em;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            text-align: left;
+        }
+        p {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            text-align: left;
+        }
+        strong {
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        /* Result Display Box */
+        .result-box {
+            padding: 25px;
+            border-radius: 12px;
+            margin: 30px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5em;
+            font-weight: 700;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Specific colors for risk categories */
+        .result-box.high-risk { background-color: #e74c3c; } /* Red */
+        .result-box.medium-risk { background-color: #f39c12; } /* Orange */
+        .result-box.low-risk { background-color: #3498db; } /* Blue */
+        .result-box.no-risk { background-color: #00b894; } /* Green */
+
+        .result-box p {
+            color: white;
+            margin: 5px 0;
+            text-align: center;
+            font-size: 1em; /* Adjust for smaller text inside the box */
+        }
+        .result-box span {
+            font-size: 1.8em; /* Larger for the risk category */
+            display: block;
+            margin-top: 10px;
+        }
+
+        /* Disclaimer Section */
+        .disclaimer {
+            background-color: #fff3e0; /* Light orange for caution/disclaimer */
+            border: 1px solid #ffcc80;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: left;
+            font-size: 0.95em;
+            color: #e65100; /* Dark orange */
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        .disclaimer h3 {
+            color: #e65100;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+        .disclaimer strong {
+            color: #d84315; /* Reddish orange for emphasis */
+        }
+
+        /* Flagged Questions Section */
+        .flagged-questions-section {
+            text-align: left;
+            margin-top: 30px;
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #eee;
+            border-radius: 10px;
+            background-color: #fcfcfc;
+        }
+        .flagged-questions-section h3 {
+            color: #2c3e50;
+            font-size: 1.5em;
+            margin-bottom: 20px;
+        }
+        .flagged-questions-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .flagged-questions-list li {
+            background-color: #ffebeb; /* Light red background for flagged items */
+            border-left: 5px solid #ff6b6b; /* Red border on the left */
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .flagged-questions-list li strong {
+            display: inline;
+            font-size: 1em;
+            color: #333;
+        }
+        .flagged-questions-list li p {
+            font-size: 0.9em;
+            color: #555;
+            margin-top: 5px;
+            margin-bottom: 0;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 20px; /* Space between buttons */
+            flex-wrap: wrap; /* Allow wrapping on small screens */
+        }
+
+        .button {
+            display: inline-block;
+            background-color: #007bff; /* Default blue button */
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none; /* Remove underline for links */
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+        }
+
+        .button:hover {
+            background-color: #0056b3; /* Darker blue on hover */
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 123, 255, 0.3);
+        }
+
+        .button:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+        }
+
+        /* Specific style for the video assessment button */
+        .video-button {
+            background-color: #28a745; /* Green */
+        }
+        .video-button:hover {
+            background-color: #218838; /* Darker green */
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
+            }
+            h1 {
+                font-size: 2.2em;
+            }
+            h2 {
+                font-size: 1.5em;
+            }
+            .result-box {
+                font-size: 1.2em;
+            }
+            .result-box span {
+                font-size: 1.5em;
+            }
+            .disclaimer {
+                font-size: 0.9em;
+            }
+            .button {
+                width: 80%; /* Make buttons wider on medium screens */
+                font-size: 1.1em;
+                padding: 12px 20px;
+            }
+            .action-buttons {
+                flex-direction: column; /* Stack buttons vertically */
+                gap: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px 15px;
+            }
+            h1 {
+                font-size: 1.8em;
+            }
+            h2 {
+                font-size: 1.3em;
+            }
+            .result-box {
+                font-size: 1em;
+            }
+            .result-box span {
+                font-size: 1.3em;
+            }
+            .disclaimer {
+                font-size: 0.85em;
+            }
+            .button {
+                width: 100%; /* Full width buttons on small screens */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Questionnaire Assessment Results for {{ user_info.child_name }}</h1>
+        <p>Hello {{ user_info.parent_name }}, based on the information you provided in the questionnaire:</p>
+
+        <div class="result-box
+            {% if questionnaire_risk_category == 'High Risk' %}high-risk
+            {% elif questionnaire_risk_category == 'Medium Risk' %}medium-risk
+            {% elif questionnaire_risk_category == 'Low Risk' %}low-risk
+            {% else %}no-risk{% endif %}">
+            <p>Your child's <strong>questionnaire-based risk category</strong> is:</p>
+            <span>{{ questionnaire_risk_category }}</span>
+            <p>Total Red Flags Identified: <strong>{{ red_flags_count }}</strong></p>
+        </div>
+
+        <div class="disclaimer">
+            <h3>Important Disclaimer:</h3>
+            <p>
+                Please remember that <strong>AutoDetect AI is a screening tool only</strong> and is not capable of providing a medical diagnosis.
+                Autism Spectrum Disorder can only be diagnosed by qualified healthcare professionals (e.g., developmental pediatricians, child psychologists, neurologists).
+            </p>
+            <p>
+                If this assessment suggests a <strong>"Medium Risk"</strong> or <strong>"High Risk"</strong>, or if you have any concerns about your child's development, we strongly recommend that you consult with your child's pediatrician or a developmental specialist for a comprehensive evaluation. Early intervention can make a significant difference.
+            </p>
+            <p>
+                We appreciate your participation and dedication to your child's well-being.
+            </p>
+        </div>
+
+        {% if flagged_questions %}
+            <div class="flagged-questions-section">
+                <h3>Details of Identified Red Flags:</h3>
+                <ul class="flagged-questions-list">
+                    {% set current_title = None %}
+                    {% for flag in flagged_questions | sort(attribute='step_title') %}
+                        {% if flag.step_title != current_title %}
+                            {% if not loop.first %}<br>{% endif %}
+                            <h2>{{ flag.step_title }}</h2>
+                            {% set current_title = flag.step_title %}
+                        {% endif %}
+                        <li>
+                            <strong>Question:</strong> {{ flag.question_text }}<br>
+                            <p><strong>Your Answer:</strong> {{ flag.user_answer | title }}</p>
+                            <p><strong>Reasoning:</strong> {{ flag.red_flag_reasoning }}</p>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% else %}
+            <div class="flagged-questions-section">
+                <p>No specific red flags were identified in the questionnaire based on the provided answers. This is a positive indication, but remember this is an initial screening.</p>
+            </div>
+        {% endif %}
+
+        <div class="action-buttons">
+            {% if show_video_option %}
+                <a href="{{ url_for('video_assessment_page') }}" class="button video-button">Proceed to Video Assessment</a>
+            {% endif %}
+            <a href="{{ url_for('thank_you_page') }}" class="button">Complete Assessment & Exit</a>
+            <a href="{{ url_for('home') }}" class="button">Start New Assessment</a>
+        </div>
+    </div>
+</body>
+</html>

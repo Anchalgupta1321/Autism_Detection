@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>AutoDetect AI – Early Autism Detection</title>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Open Sans', sans-serif;
+            background: url('https://www.transparenttextures.com/patterns/paper-fibers.png') repeat, linear-gradient(to bottom right, #e6f5ff, #f3fcff);
+            background-blend-mode: overlay;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 520px;
+            width: 100%;
+            animation: fadeIn 1s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            color: #2c3e50;
+            font-size: 2.6em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        h2 {
+            font-size: 1em;
+            font-weight: 400;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        p {
+            font-size: 1.05em;
+            margin-bottom: 25px;
+            color: #444;
+        }
+
+        form {
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #444;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="email"], /* Added type for email */
+        select {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            font-size: 1em;
+            box-sizing: border-box;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: #00aaff;
+            box-shadow: 0 0 5px rgba(0, 170, 255, 0.3);
+            outline: none;
+        }
+
+        input[type="submit"] {
+            background-color: #00b894;
+            color: white;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #009f7a;
+            transform: scale(1.02);
+        }
+
+        input[type="submit"]:active {
+            transform: scale(1);
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 30px 20px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            h2 {
+                font-size: 0.95em;
+            }
+
+            p {
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AutoDetect AI</h1>
+        <h2>AI-Powered Early Screening for Toddler Autism,<br> with Clear and Trustworthy Insights</h2>
+        <p>Let’s begin with a few quick details about your little one and yourself.</p> <form method="POST" action="/start-questionnaire">            <label for="child_name">👶 Child's Name</label>
+            <input type="text" id="child_name" name="child_name" required />
+
+            <label for="child_age">📅 Age in Months</label>
+            <input type="number" id="child_age" name="child_age" min="12" max="36" required />
+
+            <label for="gender">⚧️ Gender</label>
+            <select id="gender" name="gender" required>
+                <option value="">-- Select --</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+            </select>
+
+            <label for="parent_name">👨‍👩‍👧 Parent's Name</label>
+            <input type="text" id="parent_name" name="parent_name" required />
+
+            <label for="parent_email">📧 Parent's Email</label>
+            <input type="email" id="parent_email" name="parent_email" required />
+
+            <input type="submit" value="🎯 Start Assessment" />
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; }
+    h2 { color: #007BFF; }
+    .summary { background: #f0f0f0; padding: 10px; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <h2>Assessment Report for {{ child_name }}</h2>
+  <p>Dear {{ parent_name }},</p>
+  <p>Thank you for completing the autism screening assessment. Here is a summary:</p>
+
+  <div class="summary">
+    <strong>Risk Category:</strong> {{ questionnaire_risk_category }}<br>
+    <strong>Red Flags Count:</strong> {{ final_red_flags_count }}<br>
+    <strong>Final Prediction:</strong> {{ final_prediction }}<br>
+    <strong>Video Analysis:</strong> {{ video_analysis_outcome }}<br>
+    <strong>Reasoning:</strong> {{ video_analysis_reason }}
+  </div>
+
+  <p>If you have any questions or would like to speak to a professional, please consider consulting a pediatrician or developmental specialist.</p>
+
+  <p>Best regards,<br><em>Autism Screening Team</em></p>
+</body>
+</html>

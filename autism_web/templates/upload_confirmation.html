@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoDetect AI – Video Upload Confirmed</title>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: url('https://www.transparenttextures.com/patterns/paper-fibers.png') repeat, linear-gradient(to bottom right, #e6f5ff, #f3fcff);
+            background-blend-mode: overlay;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #333;
+        }
+        .container {
+            max-width: 700px;
+            margin: auto;
+            background: #fff;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 100%;
+            animation: fadeIn 1s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+        p {
+            font-size: 1.1em;
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+        .confirmation-message {
+            background-color: #d4edda; /* Green for success */
+            border: 1px solid #28a745;
+            color: #155724;
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 30px;
+            margin-bottom: 40px;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+        .disclaimer {
+            background-color: #fff3e0;
+            border: 1px solid #ffcc80;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: left;
+            font-size: 0.95em;
+            color: #e65100;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        .disclaimer h3 {
+            color: #e65100;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+
+        .button {
+            display: inline-block;
+            background-color: #007bff;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+            margin-top: 20px;
+        }
+        .button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 123, 255, 0.3);
+        }
+        .button:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .container {
+                padding: 30px 20px;
+            }
+            h1 {
+                font-size: 2em;
+            }
+            .confirmation-message {
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Video Upload Confirmation</h1>
+        <p>Hello {{ parent_name }},</p>
+
+        <div class="confirmation-message">
+            <p><strong>Your video for {{ child_name }} has been uploaded successfully!</strong></p>
+            <p>We will now process this video for further assessment.</p>
+        </div>
+
+        <div class="disclaimer">
+            <h3>Next Steps:</h3>
+            <p>
+                Our AI system will analyze the video data in conjunction with the questionnaire responses. This process may take some time.
+                We will notify you via email at **{{ parent_email }}** once the video analysis is complete and refined insights are available.
+            </p>
+            <p>
+                As a reminder, this assessment is a screening tool, not a diagnostic one. Any insights provided are for informational purposes and should not replace professional medical advice.
+            </p>
+        </div>
+
+        <a href="{{ url_for('home') }}" class="button">Start New Assessment</a>
+	<a href="{{ url_for('show_combined_results') }}" class="button" style="background-color: #28a745; margin-left: 10px;">
+	    View Final Results
+	</a>
+    </div>
+</body>
+</html>

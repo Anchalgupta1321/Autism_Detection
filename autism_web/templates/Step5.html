@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoDetect AI – Family History (Step 5/5)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: url('https://www.transparenttextures.com/patterns/paper-fibers.png') repeat, linear-gradient(to bottom right, #e6f5ff, #f3fcff);
+            background-blend-mode: overlay;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #fff;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 100%;
+            animation: fadeIn 1s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 40px;
+            overflow: hidden;
+            height: 12px;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 100%; /* 5 out of 5 steps = 100% */
+            background-color: #00b894; /* Green */
+            border-radius: 10px;
+            color: white;
+            transition: width 0.5s ease-in-out;
+        }
+
+        .progress-text {
+            position: absolute;
+            width: 100%;
+            top: 0;
+            left: 0;
+            font-size: 0.8em;
+            font-weight: 600;
+            line-height: 12px;
+            color: #333;
+            text-align: center;
+            user-select: none;
+        }
+
+        form {
+            text-align: left;
+        }
+
+        .question-group {
+            margin-bottom: 25px;
+            border: 1px solid #f0f0f0;
+            border-radius: 10px;
+            padding: 20px;
+            background-color: #fdfdfd;
+            transition: box-shadow 0.3s ease, transform 0.3s ease;
+        }
+
+        .question-group:hover {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transform: translateY(-3px);
+        }
+
+        .question-group label {
+            display: block;
+            margin-bottom: 15px;
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1em;
+            line-height: 1.4;
+        }
+
+        .question-group select {
+            width: 100%;
+            padding: 12px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 1em;
+            box-sizing: border-box;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007bff%22%20d%3D%22M287%2069.9a14.7%2014.7%200%200%200-20.8%200L146.2%20190.3%2026.3%2069.9A14.7%2014.7%200%200%200%205.5%2090.7l128.8%20128.8c5.7%205.7%2014.8%205.7%2020.5%200L287%2090.7a14.7%2014.7%200%200%200%200-20.8z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 12px;
+            cursor: pointer;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+        }
+
+        .question-group select:hover {
+            transform: scale(1.005);
+        }
+
+        .question-group select:focus {
+            border-color: #00aaff;
+            box-shadow: 0 0 8px rgba(0, 170, 255, 0.4);
+            outline: none;
+            transform: scale(1.005);
+        }
+
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-family: 'Open Sans', sans-serif;
+            font-size: 0.95em;
+            box-sizing: border-box;
+            min-height: 80px;
+            resize: vertical;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        textarea:focus {
+            border-color: #00aaff;
+            box-shadow: 0 0 5px rgba(0, 170, 255, 0.3);
+            outline: none;
+        }
+
+        /* Styles for the Submit Assessment button (matching previous 'Next' buttons) */
+        #submit-step5 { /* Changed from input[type="submit"] to the specific ID */
+            margin-top: 30px;
+            background-color: #00b894; /* Base green color */
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            font-weight: 600;
+            border-radius: 10px; /* Consistent border-radius */
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 184, 148, 0.2); /* Consistent shadow */
+        }
+
+        #submit-step5:hover {
+            background-color: #009f7a; /* Darker green on hover */
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 184, 148, 0.3);
+        }
+
+        #submit-step5:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 10px rgba(0, 184, 148, 0.2);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .container {
+                padding: 30px 20px;
+            }
+            h1 {
+                font-size: 2em;
+            }
+            .progress-bar-container {
+                margin-bottom: 30px;
+            }
+            .question-group {
+                padding: 15px;
+            }
+            .question-group label {
+                font-size: 1em;
+            }
+            #submit-step5 { /* Applying responsive adjustments to the specific button */
+                padding: 12px 20px;
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Family History</h1>
+
+        <div class="progress-bar-container">
+            <div class="progress-bar" style="width: 100%;"></div>
+            <div class="progress-text">Step 5 of 5</div>
+        </div>
+
+        <form id="questionnaire-form">
+            <input type="hidden" name="child_name" value="{{ user_info.child_name }}">
+            <input type="hidden" name="age" value="{{ user_info.age }}">
+            <input type="hidden" name="gender" value="{{ user_info.gender }}">
+            <input type="hidden" name="parent_name" value="{{ user_info.parent_name }}">
+            <input type="hidden" name="parent_email" value="{{ user_info.parent_email }}">
+
+            <input type="hidden" name="q_point_look" value="{{ all_answers.q_point_look }}">
+            <input type="hidden" name="q_respond_name" value="{{ all_answers.q_respond_name }}">
+            <input type="hidden" name="q_smile_back" value="{{ all_answers.q_smile_back }}">
+            <input type="hidden" name="q_eye_contact" value="{{ all_answers.q_eye_contact }}">
+            <input type="hidden" name="q_interested_peers" value="{{ all_answers.q_interested_peers }}">
+            <input type="hidden" name="q_show_to_share" value="{{ all_answers.q_show_to_share }}">
+            <input type="hidden" name="q_follow_gaze" value="{{ all_answers.q_follow_gaze }}">
+            <input type="hidden" name="q_get_attention" value="{{ all_answers.q_get_attention }}">
+            <input type="hidden" name="q_social_referencing" value="{{ all_answers.q_social_referencing }}">
+            <input type="hidden" name="q_point_request" value="{{ all_answers.q_point_request }}">
+            <input type="hidden" name="q_point_show" value="{{ all_answers.q_point_show }}">
+            <input type="hidden" name="q_imitate_wave_clap" value="{{ all_answers.q_imitate_wave_clap }}">
+            <input type="hidden" name="q_8_words" value="{{ all_answers.q_8_words }}">
+            <input type="hidden" name="q_follow_instructions" value="{{ all_answers.q_follow_instructions }}">
+            <input type="hidden" name="q_to_and_fro_conv" value="{{ all_answers.q_to_and_fro_conv }}">
+            <input type="hidden" name="q_echolalia" value="{{ all_answers.q_echolalia }}">
+
+            <input type="hidden" name="p1_play_pretend" value="{{ all_answers.p1_play_pretend }}">
+            <input type="hidden" name="p2_play_small_toys" value="{{ all_answers.p2_play_small_toys }}">
+            <input type="hidden" name="p3_copy_you" value="{{ all_answers.p3_copy_you }}">
+            <input type="hidden" name="p4_play_doll" value="{{ all_answers.p4_play_doll }}">
+            <input type="hidden" name="p5_play_imaginatively_others" value="{{ all_answers.p5_play_imaginatively_others }}">
+
+            <input type="hidden" name="b1_hearing_problem" value="{{ all_answers.b1_hearing_problem }}">
+            <input type="hidden" name="b2_upset_noises" value="{{ all_answers.b2_upset_noises }}">
+            <input type="hidden" name="b3_finger_movements" value="{{ all_answers.b3_finger_movements }}">
+            <input type="hidden" name="b4_line_up_toys" value="{{ all_answers.b4_line_up_toys }}">
+            <input type="hidden" name="b5_repetitive_movements" value="{{ all_answers.b5_repetitive_movements }}">
+            <input type="hidden" name="b6_parts_of_toy" value="{{ all_answers.b6_parts_of_toy }}">
+            <input type="hidden" name="b7_upset_routines" value="{{ all_answers.b7_upset_routines }}">
+            <input type="hidden" name="b8_stare_wander" value="{{ all_answers.b8_stare_wander }}">
+            <input type="hidden" name="b9_unusual_interests" value="{{ all_answers.b9_unusual_interests }}">
+            <input type="hidden" name="b10_sensitive_touch" value="{{ all_answers.b10_sensitive_touch }}">
+            <input type="hidden" name="b11_enjoy_movement" value="{{ all_answers.b11_enjoy_movement }}">
+
+            <input type="hidden" name="d1_lost_skills" value="{{ all_answers.d1_lost_skills }}">
+            <input type="hidden" name="d1_skill_description" value="{{ all_answers.d1_skill_description }}">
+            <input type="hidden" name="d2_walk_independently" value="{{ all_answers.d2_walk_independently }}">
+            <input type="hidden" name="d3_feeding_difficulties" value="{{ all_answers.d3_feeding_difficulties }}">
+            <input type="hidden" name="d4_sleep_patterns" value="{{ all_answers.d4_sleep_patterns }}">
+
+
+            <div class="question-group">
+                <label for="f1_family_asd">1. 👨‍👩‍👧‍👦 Has anyone in your immediate family (parents, siblings) or extended family (grandparents, aunts, uncles, cousins) been diagnosed with autism spectrum disorder (ASD)?</label>
+                <select name="f1_family_asd" id="f1_family_asd" required data-red-flag="yes">
+                    <option value="">-- Select --</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                </select>
+            </div>
+
+            <div class="question-group">
+                <label for="f2_family_social_diff">2. 🗣️❓ Has anyone in your family (immediate or extended) had significant difficulties with social interaction or communication that might be consistent with autism, even if they were never formally diagnosed?</label>
+                <select name="f2_family_social_diff" id="f2_family_social_diff" required data-red-flag="yes">
+                    <option value="">-- Select --</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                </select>
+            </div>
+
+            <div class="question-group">
+                <label for="f3_family_neuro_conditions">3. 🧠 Is there a family history of other neurodevelopmental conditions such as ADHD, learning disabilities, or significant speech/language delays?</label>
+                <select name="f3_family_neuro_conditions" id="f3_family_neuro_conditions" required data-red-flag="yes">
+                    <option value="">-- Select --</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                </select>
+            </div>
+
+            <div class="question-group">
+                <label for="f4_genetic_conditions">4. 🧬 Are there any known genetic conditions or syndromes in your family that are sometimes associated with autism (e.g., Fragile X syndrome, Tuberous Sclerosis)?</label>
+                <select name="f4_genetic_conditions" id="f4_genetic_conditions" required data-red-flag="yes">
+                    <option value="">-- Select --</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                </select>
+            </div>
+
+            <input type="submit" value="Submit Assessment" id="submit-step5">
+        </form>
+    </div>
+    <script>
+        document.getElementById('questionnaire-form').addEventListener('submit', function (event) {
+            event.preventDefault(); // Prevent default form submission
+
+            const form = event.target;
+            const formData = {};
+
+            // Collect values from all input elements in the form
+            // This includes hidden inputs for previous steps and select elements for current step
+            form.querySelectorAll('input[type="hidden"], select, textarea').forEach(input => {
+                if (input.name) {
+                    formData[input.name] = input.value;
+                }
+            });
+
+            console.log("Submitting final data:", formData);
+
+            fetch('/submit-step/5', { // Correct endpoint for final submission
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    // Handle HTTP errors
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.status === 'ok') {
+                    // Success, redirect as instructed by the server
+                    window.location.href = data.redirect_url; // Use the redirect_url from the server
+                } else {
+                    alert('Submission failed: ' + (data.message || 'Unknown error.'));
+                }
+            })
+            .catch(error => {
+                console.error('Error during final assessment submission:', error);
+                alert('Error submitting the assessment. Please try again.');
+            });
+        });
+    </script>
+</body>
+</html>

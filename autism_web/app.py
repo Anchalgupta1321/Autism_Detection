@@ -1,0 +1,670 @@
+import os
+import random # For simulating video analysis
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+from werkzeug.utils import secure_filename
+import json
+import secrets # For generating a strong secret key
+from flask_session import Session
+from flask_mail import Mail, Message
+import torch
+from torchvision import models, transforms
+import cv2
+from PIL import Image
+import numpy as np
+from torchvision.models import MobileNet_V2_Weights
+
+
+app = Flask(__name__)
+app.config['SESSION_TYPE'] = 'filesystem'  # or 'redis' if you prefer Redis
+app.config['SESSION_FILE_DIR'] = './flask_session_data'  # Directory to store session files
+app.config['SESSION_PERMANENT'] = False  # Optional: Makes session non-permanent
+Session(app)
+# Generate a strong secret key for session management
+app.secret_key = secrets.token_hex(16)
+
+# --- Email Configuration ---
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'  # Or another SMTP server
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME', 'guptaanchal0321@gmail.com')     # Your email
+app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD', '')         # Set via environment variable (e.g., Gmail App Password)
+mail = Mail(app)
+
+# --- Configuration for Video Upload ---
+UPLOAD_FOLDER = 'uploads'
+ALLOWED_EXTENSIONS = {'mp4', 'avi', 'mov', 'mkv'}
+MAX_FILE_SIZE = 100 * 1024 * 1024 # 100 MB
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = MAX_FILE_SIZE
+
+# Ensure the upload folder exists
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
+import torch.nn as nn
+import torchvision.models as models
+
+class CNNLSTM(nn.Module):
+    def __init__(self, hidden_dim=128):
+        super().__init__()
+        base_model = models.mobilenet_v2(weights=MobileNet_V2_Weights.DEFAULT)
+        self.cnn = nn.Sequential(
+            *list(base_model.children())[:-1],
+            nn.AdaptiveAvgPool2d((1, 1))
+        )
+        cnn_out_features = 1280
+        self.lstm = nn.LSTM(cnn_out_features, hidden_dim, batch_first=True)
+        self.fc = nn.Linear(hidden_dim, 1)
+
+    def forward(self, x):  # x: [B, T, 3, 224, 224]
+        B, T, C, H, W = x.size()
+        x = x.view(B * T, C, H, W)
+        with torch.no_grad():
+            feats = self.cnn(x).squeeze()
+        feats = feats.view(B, T, -1)
+        _, (hn, _) = self.lstm(feats)
+        hn_last_layer = hn[-1].squeeze(0)
+        out = self.fc(hn_last_layer)
+        return torch.sigmoid(out).view(-1)
+
+model = CNNLSTM()
+model.load_state_dict(torch.load("final_code/best_stimming_detector_model_mobilenetv2.pth", map_location=torch.device('cpu')))
+model.eval()
+
+
+def allowed_file(filename):
+    """
+    Checks if the uploaded file has an allowed extension.
+    """
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+# --- Comprehensive Red Flag Criteria with Questions and Reasoning, grouped by step ---
+# This dictionary now structures the questions by their respective steps,
+# making it easier to render them dynamically in the templates.
+QUESTIONNAIRE_STEPS = {
+    "step1": {
+        "title": "Social Interaction and Communication",
+        "template": "step1.html",
+        "questions": {
+            'q_point_look': {'question': '1. 👉 If you point at something across the room (e.g., a toy or an animal), does your child look at it?', 'red_flag_answer': 'no', 'reasoning': 'Joint attention (sharing focus on an object with another person) is a key social communication skill often impaired in ASD. Failure to follow a point indicates a lack of shared attention.'},
+            'q_respond_name': {'question': '2. 👂 Does your child respond (e.g., look up, babble, talk, or stop what they\'re doing) when you call their name?', 'red_flag_answer': 'no', 'reasoning': 'Lack of response to one\'s name is a common early indicator of ASD, suggesting difficulties with social responsiveness and auditory processing of social cues.'},
+            'q_smile_back': {'question': '3. 😊 When you smile at your child, does he or she smile back at you?', 'red_flag_answer': 'no', 'reasoning': 'Reciprocal social-emotional interaction, including sharing affect and responding to social overtures, is a core deficit in ASD.'},
+            'q_eye_contact': {'question': '4. 👀 Does your child look you in the eye when you are talking, playing, or dressing them?', 'red_flag_answer': 'no', 'reasoning': 'Reduced eye contact or atypical eye gaze is a frequent characteristic of ASD, reflecting challenges with social engagement and nonverbal communication.'},
+            'q_interested_peers': {'question': '5. 👧👦 Is your child interested in other children (e.g., do they watch other children, smile at them, or go to them)?', 'red_flag_answer': 'no', 'reasoning': 'Limited interest in peers or difficulty engaging in reciprocal social play with other children is a hallmark feature of ASD.'},
+            'q_show_to_share': {'question': '6. 🤝 Does your child show you things by bringing them to you or holding them up just to share (not to get help)?', 'red_flag_answer': 'no', 'reasoning': 'Sharing enjoyment or interest (proto-declarative pointing or showing) is a form of joint attention and social reciprocity often absent or impaired in young children with ASD.'},
+            'q_follow_gaze': {'question': '7. 🧑‍ If you turn your head to look at something, does your child look around to see what you are looking at?', 'red_flag_answer': 'no', 'reasoning': 'This assesses joint attention (following gaze). Difficulty with this indicates challenges in sharing attention and understanding others\' focus.'},
+            'q_get_attention': {'question': '8. 🌟 Does your child try to get you to watch them (e.g., looking at you for praise, or saying "look" or "watch me")?', 'red_flag_answer': 'no', 'reasoning': 'Seeking to share enjoyment, draw attention to oneself, or get social praise is a social communicative behavior often reduced or absent in children with ASD.'},
+            'q_social_referencing': {'question': '9. 🤔 If something new happens, does your child look at your face to see how you feel about it (e.g., if they hear a strange noise or see a new toy)?', 'red_flag_answer': 'no', 'reasoning': 'Social referencing (looking to a caregiver\'s facial expression for cues on how to react in an ambiguous situation) is a key social skill that can be impaired in ASD.'},
+            'q_point_request': {'question': '10. 🤏 Does your child use their index finger to point to ask for something or to get help (e.g., pointing to a snack out of reach)?', 'red_flag_answer': 'no', 'reasoning': 'Proto-imperative pointing (pointing to request) is an early communicative gesture. Absence suggests challenges in using gestures to communicate needs.'},
+            'q_point_show': {'question': '11. ✨ Does your child use their index finger to point to show you something interesting (e.g., an airplane in the sky)?', 'red_flag_answer': 'no', 'reasoning': 'Proto-declarative pointing (pointing to share interest/comment) is a crucial aspect of joint attention and shared enjoyment, often missing in ASD.'},
+            'q_imitate_wave_clap': {'question': '12. 👋 Does your child wave "bye-bye" or clap hands to imitate you?', 'red_flag_answer': 'no', 'reasoning': 'Impaired imitation of gestures and actions is a common feature of ASD, affecting social learning and communication.'},
+            'q_8_words': {'question': '13. 🗣️ Does your child use at least 8 words in addition to "Mama" and "Dada"?', 'red_flag_answer': 'no', 'reasoning': 'Delayed or absent spoken language is a significant red flag for ASD. The specific word count is age-dependent, but a clear delay in expressive vocabulary warrants concern.'},
+            'q_follow_instructions': {'question': '14. 🧠 Can your child follow simple instructions without you pointing or gesturing (e.g., "Put the book on the chair")?', 'red_flag_answer': 'no', 'reasoning': 'Difficulty with receptive language, particularly understanding verbal commands without visual cues, can be a feature of ASD.'},
+            'q_to_and_fro_conv': {'question': '15. 💬 Does your child have a "to and fro" conversation that involves taking turns or building on what you\'ve said?', 'red_flag_answer': 'no', 'reasoning': 'Difficulties with reciprocal conversation and the back-and-forth nature of social interaction are core diagnostic criteria for ASD, particularly as children get older.'},
+            'q_echolalia': {'question': '16. 🔄 Does your child often repeat words or phrases exactly as they hear them (e.g., repeating a question you asked)?', 'red_flag_answer': 'yes', 'reasoning': 'Echolalia (repeating words or phrases) can be a characteristic of ASD, especially if it\'s non-communicative or occurs frequently outside of typical language development stages.'},
+        }
+    },
+    "step2": {
+        "title": "Play and Imagination",
+        "template": "step2.html",
+        "questions": {
+            'p_play_pretend': {'question': '1. 🎭 Does your child play pretend or make-believe (e.g., pretending to drink from an empty cup, talking on a phone, or feeding a doll)?', 'red_flag_answer': 'no', 'reasoning': 'Limited or absent imaginative/symbolic play is a key indicator of ASD. Children with autism often struggle with abstract thought and imitation, which are foundational to pretend play.'},
+            'p_play_small_toys': {'question': '2. 🧩 Can your child play properly with small toys (e.g., cars or blocks) without just mouthing, fiddling, or dropping them?', 'red_flag_answer': 'no', 'reasoning': 'This question addresses both appropriate functional play and repetitive behaviors. Children with ASD may engage in repetitive manipulation of objects (e.g., spinning wheels of a car, lining up blocks) rather than using them for their intended purpose, or they may simply mouth/fidget without purposeful play.'},
+            'p_copy_you': {'question': '3. 👯 Does your child try to copy what you do (e.g., pretend to vacuum, sweep, or shave)?', 'red_flag_answer': 'no', 'reasoning': 'Impaired imitation of actions and gestures is common in ASD. This includes both simple motor imitation and more complex imitative play (like domestic routines).'},
+            'p_play_doll': {'question': '4. 🧸 When playing with a stuffed animal or doll, does your child pretend to rock it, feed it, or put it to bed?', 'red_flag_answer': 'no', 'reasoning': 'This specifically assesses a form of functional and imaginative play involving social themes (caring for others). A lack of such play is consistent with challenges in social reciprocity and imagination seen in ASD.'},
+            'p_play_imaginatively_others': {'question': '5. 🧑‍🤝‍🧑 Does your child play imaginatively with other children, and engage in role-play?', 'red_flag_answer': 'no', 'reasoning': 'Difficulties in developing, maintaining, and understanding relationships, including engaging in shared imaginative play with peers (like role-playing), are core deficits in ASD.'},
+        }
+    },
+    "step3": {
+        "title": "Behavioral Patterns and Sensory Sensitivities",
+        "template": "step3.html",
+        "questions": {
+            'b_hearing_problem': {'question': '1. 👂 Have you ever wondered if your child might have a hearing problem?', 'red_flag_answer': 'yes', 'reasoning': 'While it could indicate an actual hearing issue, parents of children with ASD often report concerns about hearing because their child may not respond to their name or verbal instructions, yet may react intensely to other sounds. This inconsistent auditory response is a common red flag for ASD.'},
+            'b_upset_noises': {'question': '2. 😖 Does your child get upset by everyday noises (e.g., screaming or crying at a vacuum cleaner or loud music)?', 'red_flag_answer': 'yes', 'reasoning': 'Atypical sensory sensitivities (hyper- or hypo-reactivity) are common in ASD. Over-responsiveness to sounds (auditory defensiveness) can manifest as distress, crying, or covering ears in response to everyday noises.'},
+            'b_finger_movements': {'question': '3. 🖐️👁️ Does your child make unusual finger movements near his or her eyes (e.g., wiggling fingers close to their eyes)?', 'red_flag_answer': 'yes', 'reasoning': 'This describes a form of repetitive, self-stimulatory behavior (stimming) often seen in ASD, where individuals engage in unusual visual behaviors.'},
+            'b_line_up_toys': {'question': '4. 🧱➡️ Does your child line up toys or other objects in a very specific order?', 'red_flag_answer': 'yes', 'reasoning': 'This is a classic example of highly restricted, fixated interests that are abnormal in intensity or focus, and adherence to rigid routines/patterns of behavior, common in ASD.'},
+            'b_repetitive_movements': {'question': '5. 🌀 Does your child have any unusual and repetitive movements (e.g., hand flapping, spinning)?', 'red_flag_answer': 'yes', 'reasoning': 'Stereotyped or repetitive motor movements (e.g., hand flapping, finger flicking, rocking, spinning) are core diagnostic features of ASD.'},
+            'b_parts_of_toy': {'question': '6. ⚙️ Does your child seem unusually interested in parts of a toy or object (e.g., spinning the wheels of a car) rather than using the object as it was intended?', 'red_flag_answer': 'yes', 'reasoning': 'This reflects restricted, fixated interests and unusual sensory interests, where attention is drawn to non-functional parts of objects.'},
+            'b_upset_routines': {'question': '7. 🗓️😡 Is your child very particular about routines and gets upset if they are changed?', 'red_flag_answer': 'yes', 'reasoning': 'Insistence on sameness, inflexible adherence to routines, or ritualized patterns of behavior are core diagnostic features of ASD.'},
+            'b_stare_wander': {'question': '8. 💭🚶 Does your child stare at nothing or wander with no purpose for periods of time?', 'red_flag_answer': 'yes', 'reasoning': 'While some children may space out occasionally, prolonged staring or aimless wandering can indicate difficulties with engagement, focus, or an internal preoccupation, which can be seen in ASD.'},
+            'b_unusual_interests': {'question': '9. 🌟🧠 Does your child have any strong, unusual interests that seem to preoccupy them (e.g., traffic lights, drainpipes)?', 'red_flag_answer': 'yes', 'reasoning': 'Highly restricted, fixated interests that are abnormal in intensity or focus are a core diagnostic criterion for ASD. These interests are often unusual in content.'},
+            'b_sensitive_touch': {'question': '10. ✋😬 Does your child seem overly sensitive to touch (e.g., during dressing, bathing, or hugs)?', 'red_flag_answer': 'yes', 'reasoning': 'Atypical sensory sensitivities (hyper- or hypo-reactivity) are common in ASD. Over-responsiveness to touch (tactile defensiveness) can lead to distress during routine activities like dressing or bathing.'},
+            'b_enjoy_movement': {'question': '11. 🎢 Does your child enjoy being swung, bounced on your knee, or other movement activities?', 'red_flag_answer': 'no', 'reasoning': 'While some children with ASD may seek intense sensory input, a lack of enjoyment or aversion to typical movement activities can indicate atypical sensory processing.'},
+        }
+    },
+    "step4": {
+        "title": "Developmental History & Regression",
+        "template": "step4.html",
+        "questions": {
+            'd1_lost_skills': {'question': '1. 📉 Has your child ever lost skills that they once had (e.g., stopped babbling, stopped using words, or stopped playing with toys in a typical way)?', 'red_flag_answer': 'yes', 'reasoning': 'Developmental regression (loss of previously acquired skills) is a significant red flag for ASD and warrants immediate medical evaluation.'},
+            'd2_walk_independently': {'question': '2. 🚶‍♂️ Was your child able to walk independently by the expected age (around 12-18 months)?', 'red_flag_answer': 'no', 'reasoning': 'While not primary diagnostic criteria, significant delays in walking can sometimes be associated with broader developmental concerns.'},
+            'd3_feeding_difficulties': {'question': '3. 🍽️ Has your child had any significant feeding difficulties (e.g., very restricted diet, extreme pickiness, or difficulty transitioning to different food textures)?', 'red_flag_answer': 'yes', 'reasoning': 'Atypical sensory sensitivities and insistence on sameness can manifest as significant feeding difficulties.'},
+            'd4_sleep_patterns': {'question': '4. 😴 Does your child have regular sleep patterns, or do they experience significant sleep difficulties?', 'red_flag_answer': 'no', 'reasoning': 'Sleep disturbances are highly prevalent in children with ASD and can significantly impact their well-being.'},
+        }
+    },
+    "step5": {
+        "title": "Family History",
+        "template": "step5.html",
+        "questions": {
+            'f1_family_asd': {'question': '1. 👨‍👩‍👧‍👦 Has anyone in your immediate family (parents, siblings) or extended family (grandparents, aunts, uncles, cousins) been diagnosed with autism spectrum disorder (ASD)?', 'red_flag_answer': 'yes', 'reasoning': 'ASD has a strong genetic component; family history increases likelihood.'},
+            'f2_family_social_diff': {'question': '2. 🗣️❓ Has anyone in your family (immediate or extended) had significant difficulties with social interaction or communication that might be consistent with autism, even if they were never formally diagnosed?', 'red_flag_answer': 'yes', 'reasoning': 'Explores the broader autism phenotype, indicating potential genetic predisposition.'},
+            'f3_family_neuro_conditions': {'question': '3. 🧠 Is there a family history of other neurodevelopmental conditions such as ADHD, learning disabilities, or significant speech/language delays?', 'red_flag_answer': 'yes', 'reasoning': 'Neurodevelopmental conditions often co-occur and share genetic vulnerabilities, increasing overall risk.'},
+            'f4_genetic_conditions': {'question': '4. 🧬 Are there any known genetic conditions or syndromes in your family that are sometimes associated with autism (e.g., Fragile X syndrome, Tuberous Sclerosis)?', 'red_flag_answer': 'yes', 'reasoning': 'Certain genetic syndromes have a higher comorbidity with ASD; identifying these provides crucial context.'},
+        }
+    }
+}
+
+# Flatten the QUESTIONNAIRE_STEPS into a single dictionary for easy lookup
+# by the calculate_red_flags function.
+RED_FLAG_CRITERIA_FLAT = {}
+for step_data in QUESTIONNAIRE_STEPS.values():
+    RED_FLAG_CRITERIA_FLAT.update(step_data['questions'])
+
+
+def calculate_red_flags(all_answers):
+    """
+    Calculates the number of red flags based on user answers and predefined criteria.
+    Returns the count and a list of flagged questions with their details.
+    Each flagged question includes its domain (step) title for grouping in the results.
+    """
+    red_flags_count = 0
+    flagged_questions_details = []
+
+    for question_name, criteria in RED_FLAG_CRITERIA_FLAT.items():
+        user_answer = all_answers.get(question_name)
+
+        # Skip free-text field
+        if question_name == 'd1_skill_description':
+            continue
+
+        if user_answer is not None and user_answer == criteria['red_flag_answer']:
+            # Find the domain (step) title for this question
+            step_title = next(
+                (step_data['title'] for step_data in QUESTIONNAIRE_STEPS.values()
+                 if question_name in step_data['questions']),
+                "Unknown Domain"
+            )
+
+            flagged_questions_details.append({
+                'question_name': question_name,
+                'question_text': criteria['question'],
+                'user_answer': user_answer,
+                'red_flag_reasoning': criteria['reasoning'],
+                'step_title': step_title  # 👈 Added domain title
+            })
+
+            red_flags_count += 1
+
+    return red_flags_count, flagged_questions_details
+
+
+
+def simulate_video_analysis(questionnaire_red_flags_count):
+    """
+    Simulates the video-based behavioral analysis based on questionnaire red flags.
+    In a real application, this would involve a deep learning model.
+    """
+    video_likelihood_score = 0
+    analysis_reason = "No specific concerning behaviors observed in the video."
+
+    # Make the simulated video analysis somewhat correlated with questionnaire flags
+    if questionnaire_red_flags_count >= 15: # High questionnaire flags
+        video_likelihood_score = random.randint(4, 7) # More likely to show flags in video
+    elif questionnaire_red_flags_count >= 8: # Medium questionnaire flags
+        video_likelihood_score = random.randint(1, 4)
+    elif questionnaire_red_flags_count >= 4: # Low questionnaire flags
+        video_likelihood_score = random.randint(0, 2)
+    else: # Very low or no questionnaire flags
+        video_likelihood_score = random.randint(0, 1)
+
+    # Add some randomness regardless of questionnaire score
+    video_likelihood_score += random.choice([-1, 0, 0, 1]) # Introduce some variance
+
+    # Ensure score stays non-negative
+    video_likelihood_score = max(0, video_likelihood_score)
+
+    if video_likelihood_score >= 5:
+        analysis_outcome = "Consistent with potential indicators."
+        analysis_reason = "Video analysis suggests areas of atypical social engagement, repetitive movements, or unique play patterns that align with potential indicators. For example, reduced eye contact, hand flapping, or unusual interaction with toys were noted."
+    elif video_likelihood_score >= 2:
+        analysis_outcome = "Shows some atypical traits."
+        analysis_reason = "Video analysis indicates a few atypical behaviors, such as inconsistent responses or mild repetitive actions, but overall social interaction appears generally typical."
+    else:
+        analysis_outcome = "Generally typical behaviors observed."
+        analysis_reason = "Video analysis did not identify significant atypical social, communication, or behavioral patterns. Behaviors observed were generally within typical developmental ranges."
+
+    return {
+        "score": video_likelihood_score,
+        "outcome": analysis_outcome,
+        "reason": analysis_reason
+    }
+
+import cv2
+import numpy as np
+import torch
+import torchvision.transforms as transforms
+
+# Define the same transform used during training
+transform = transforms.Compose([
+    transforms.ToPILImage(),
+    transforms.Resize((224, 224)),
+    transforms.ToTensor()
+])
+
+def analyze_video(video_path):
+    cap = cv2.VideoCapture(video_path)
+    frames = []
+
+    if not cap.isOpened():
+        raise RuntimeError(f"Failed to open video: {video_path}")
+
+    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+
+    if total_frames == 0:
+        cap.release()
+        raise RuntimeError(f"Video {video_path} has no frames.")
+
+    # Uniformly sample 16 frames
+    frame_idxs = np.linspace(0, total_frames - 1, 16).astype(int)
+    current_idx = 0
+    sampled_idx = 0
+
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            break
+        if current_idx == frame_idxs[sampled_idx]:
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            tensor_frame = transform(frame)  # Shape: [C, H, W]
+            frames.append(tensor_frame)
+            sampled_idx += 1
+            if sampled_idx >= len(frame_idxs):
+                break
+        current_idx += 1
+
+    cap.release()
+
+    if len(frames) == 0:
+        raise RuntimeError("No valid frames were extracted from the video.")
+
+    # If fewer than 16 frames, duplicate the last one
+    while len(frames) < 16:
+        frames.append(frames[-1])
+
+    frames_tensor = torch.stack(frames)        # [T, C, H, W]
+    input_tensor = frames_tensor.unsqueeze(0)  # [1, T, C, H, W]
+
+    with torch.no_grad():
+        prediction = model(input_tensor)       # Output: [1]
+        probability = prediction.item()
+
+    label = "ASD" if probability >= 0.4 else "Non-ASD"
+    print(f"Predicted probability: {probability}")
+
+    return {
+        "probability": round(probability * 10, 2),
+        "label": label,
+        "interpretation": "Possible signs of stimming behavior" if label == "ASD" else "No major stimming behavior detected",
+	"outcome": label,
+	"reason": "Video shows signs of stimming behavior." if label == "ASD" else "No stimming behaviors detected."
+    }
+
+
+def send_report_email(to_email, subject, report_html):
+    msg = Message(subject,
+                  sender=app.config['MAIL_USERNAME'],
+                  recipients=[to_email])
+    msg.html = report_html  # Email supports rich formatting
+    mail.send(msg)
+
+
+@app.route('/', methods=['GET'])
+def home():
+    """Renders the initial home page where user info is collected."""
+    # Clear session data when starting a new assessment
+    session.clear()
+    return render_template('index.html')
+
+@app.route('/start-questionnaire', methods=['POST'])
+def start_questionnaire():
+    """
+    Collects initial child and parent information and initializes the session.
+    Redirects to the first step of the questionnaire.
+    """
+    child_name = request.form.get('child_name')
+    child_age = request.form.get('child_age')
+    gender = request.form.get('gender')
+    parent_name = request.form.get('parent_name')
+    parent_email = request.form.get('parent_email')
+
+    # Basic validation
+    if not all([child_name, child_age, gender, parent_name, parent_email]):
+        # You might want to flash a message here
+        return redirect(url_for('home'))
+
+    # Store initial user info in session
+    session['user_info'] = {
+        'child_name': child_name,
+        'age': child_age,
+        'gender': gender,
+        'parent_name': parent_name,
+        'parent_email': parent_email
+    }
+    # Initialize all_answers with user_info as it will accumulate all answers
+    session['all_answers'] = session['user_info'].copy()
+
+    # Redirect to the GET route for the questionnaire introduction page
+    return redirect(url_for('questionnaire_intro'))
+
+@app.route('/questionnaire-intro', methods=['GET'])
+def questionnaire_intro():
+    """Renders the questionnaire introduction page."""
+    if 'user_info' not in session:
+        return redirect(url_for('home'))
+    return render_template('questionnaire.html', user_info=session['user_info'])
+
+
+# --- Dynamic Questionnaire Step Routes ---
+@app.route('/questionnaire-step/<int:step_num>', methods=['GET'])
+def questionnaire_step_get(step_num):
+    """
+    Renders a specific step of the questionnaire dynamically.
+    """
+    if 'user_info' not in session:
+        return redirect(url_for('home'))
+
+    step_key = f"step{step_num}"
+    if step_key not in QUESTIONNAIRE_STEPS:
+        return redirect(url_for('home')) # Or a 404 page
+
+    step_data = QUESTIONNAIRE_STEPS[step_key]
+    template_name = step_data['template']
+    questions = step_data['questions']
+    step_title = step_data['title']
+
+    return render_template(template_name,
+                           user_info=session['user_info'],
+                           questions=questions,
+                           step_title=step_title,
+                           current_step=step_num,
+                           total_steps=len(QUESTIONNAIRE_STEPS),
+                           # Pass all_answers to pre-fill if navigating back
+                           all_answers=session.get('all_answers', {}))
+
+
+@app.route('/submit-step/<int:step_num>', methods=['POST'])
+def submit_questionnaire_step(step_num):
+    """
+    Handles form submission for a questionnaire step, saves answers, and redirects to the next step.
+    """
+    if 'all_answers' not in session:
+        return jsonify({'status': 'error', 'message': 'Session expired or not initialized.'}), 400
+
+    data = request.get_json()
+    if not data:
+        return jsonify({'status': 'error', 'message': 'No data received.'}), 400
+
+    all_answers = session.get('all_answers', {})
+    all_answers.update(data)
+    session['all_answers'] = all_answers  # Reassign explicitly
+    # print(f"Step {step_num} data received and session updated:", session['all_answers'])
+
+    next_step_num = step_num + 1
+    if next_step_num <= len(QUESTIONNAIRE_STEPS):
+        return jsonify({
+            'status': 'ok',
+            'message': f'Step {step_num} data successfully processed.',
+            'redirect_url': url_for('questionnaire_step_get', step_num=next_step_num)
+        })
+    else:
+        # This is the final step of the questionnaire
+        red_flags_count, flagged_questions_details = calculate_red_flags(session['all_answers'])
+
+        # Determine questionnaire-based risk
+        if red_flags_count >= 15:
+            questionnaire_risk_category = "High Risk"
+        elif red_flags_count >= 8:
+            questionnaire_risk_category = "Medium Risk"
+        elif red_flags_count >= 4:
+            questionnaire_risk_category = "Low Risk"
+        else:
+            questionnaire_risk_category = "No Risk"
+
+        # Store questionnaire results in session
+        session['questionnaire_red_flags_count'] = red_flags_count
+        session['flagged_questions_details'] = flagged_questions_details
+        session['questionnaire_risk_category'] = questionnaire_risk_category
+
+        return jsonify({
+            'status': 'ok',
+            'message': 'Final questionnaire data successfully processed.',
+            'redirect_url': url_for('display_questionnaire_results')
+        })
+
+
+@app.route('/results', methods=['GET'])
+def display_questionnaire_results():
+    """
+    Renders the results.html page to display the questionnaire-based risk assessment.
+    This serves as the branching point for video analysis or final completion.
+    """
+    if 'user_info' not in session or 'questionnaire_risk_category' not in session:
+        return redirect(url_for('home'))
+
+    # Retrieve questionnaire results from session
+    red_flags_count = session.get('questionnaire_red_flags_count', 0)
+    questionnaire_risk_category = session.get('questionnaire_risk_category', 'Unknown')
+    flagged_questions_details = session.get('flagged_questions_details', [])
+    user_info = session.get('user_info', {})
+
+    # Determine whether to show the video option
+    show_video_option = (questionnaire_risk_category in ["Medium Risk", "High Risk"])
+
+    return render_template('results.html',
+                           questionnaire_risk_category=questionnaire_risk_category,
+                           red_flags_count=red_flags_count,
+                           flagged_questions=flagged_questions_details,
+                           user_info=user_info,
+                           show_video_option=show_video_option)
+
+
+@app.route('/video-assessment', methods=['GET'])
+def video_assessment_page():
+    """Renders the video upload page if questionnaire results indicate a need for video analysis."""
+    if 'user_info' not in session or 'questionnaire_risk_category' not in session:
+        return redirect(url_for('home'))
+
+    # If they somehow got here without being Medium/High Risk, redirect them back to questionnaire results
+    if session.get('questionnaire_risk_category') not in ["Medium Risk", "High Risk"]:
+        return redirect(url_for('display_questionnaire_results'))
+
+    # Pass child_name for the video_upload.html template
+    return render_template('video_upload.html',
+                           child_name=session['user_info']['child_name'],
+                           upload_message=session.pop('upload_message', None)) # Pop message after displaying
+
+@app.route('/upload-video', methods=['POST'])
+def upload_video():
+    """
+    Handles video file upload, simulates video analysis, and determines combined final risk.
+    """
+    if 'video_file' not in request.files:
+        session['upload_message'] = "No file part in the request."
+        return redirect(url_for('video_assessment_page'))
+
+    file = request.files['video_file']
+
+    if file.filename == '':
+        session['upload_message'] = "No selected file."
+        return redirect(url_for('video_assessment_page'))
+
+    if not allowed_file(file.filename):
+        session['upload_message'] = "File type not allowed. Please upload MP4, AVI, MOV, or MKV."
+        return redirect(url_for('video_assessment_page'))
+
+    if file:
+        filename = secure_filename(file.filename)
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(filepath)
+
+        # Get questionnaire red flags count from session
+        questionnaire_red_flags_count = session.get('questionnaire_red_flags_count', 0)
+
+        # Simulate video analysis
+        # video_analysis_result = simulate_video_analysis(questionnaire_red_flags_count)
+        video_analysis_result = analyze_video(filepath)
+
+        
+        # Determine final prediction based on combined score logic
+        # influences the final prediction alongside questionnaire_red_flags_count.
+        # For a simple example, let's just add them.
+        combined_score = questionnaire_red_flags_count + video_analysis_result['probability']
+        # Determine final prediction based on combined score (example thresholds)
+        if combined_score >= 18: # Higher threshold for combined high risk
+            final_prediction = "High Likelihood"
+        elif combined_score >= 8: # Medium threshold
+            final_prediction = "Low Likelihood"
+        else:
+            final_prediction = "No Likelihood"
+
+
+        # Store all combined results in session for the final results page
+        session['final_prediction'] = final_prediction
+        session['video_analysis_outcome'] = video_analysis_result['outcome']
+        session['video_analysis_reason'] = video_analysis_result['reason']
+        session['combined_score'] = combined_score # Store for debugging/display if needed
+
+        # Store a success message for the confirmation page
+        session['upload_message'] = f"Video '{filename}' uploaded successfully!"
+
+        # Redirect to the combined results page
+        return redirect(url_for('upload_confirmation')) # Redirect to a confirmation page
+
+
+@app.route('/upload-confirmation', methods=['GET'])
+def upload_confirmation():
+    """Displays a confirmation page after video upload and redirects to final results."""
+    if 'user_info' not in session or 'upload_message' not in session:
+        return redirect(url_for('home')) # Ensure session data exists
+
+    user_info = session.get('user_info', {})
+    upload_message = session.pop('upload_message', None) # Get and clear the message
+
+    return render_template('upload_confirmation.html',
+                           parent_name=user_info.get('parent_name'),
+                           child_name=user_info.get('child_name'),
+                           parent_email=user_info.get('parent_email'),
+                           upload_message=upload_message)
+
+@app.route("/combined-results", methods=['GET'])
+def show_combined_results():
+    if 'user_info' not in session or 'final_prediction' not in session:
+        if 'questionnaire_risk_category' in session:
+            final_prediction_from_qr = session['questionnaire_risk_category'].replace(' Risk', ' Likelihood')
+            session['final_prediction'] = final_prediction_from_qr
+            session['video_analysis_outcome'] = "Video assessment skipped."
+            session['video_analysis_reason'] = "No video was provided for analysis."
+            session['combined_score'] = session.get('questionnaire_red_flags_count', 0)
+        else:
+            return redirect(url_for('home'))
+
+    final_prediction = session.get('final_prediction', 'Unknown')
+    questionnaire_risk_category = session.get('questionnaire_risk_category', 'Unknown')
+    red_flags_count = session.get('questionnaire_red_flags_count', 0)
+    video_analysis_outcome = session.get('video_analysis_outcome', 'N/A')
+    video_analysis_reason = session.get('video_analysis_reason', 'N/A')
+    flagged_questions_details = session.get('flagged_questions_details', [])
+    user_info = session.get('user_info', {})
+
+    # Enhanced explanation logic
+    explanation_summary = ""
+    if questionnaire_risk_category in ["Medium Risk", "High Risk"] and video_analysis_outcome == "ASD":
+        explanation_summary = (
+            f"Both the questionnaire (showing {questionnaire_risk_category.lower()}) and the video analysis \
+            suggest indicators consistent with autism spectrum behaviors. This dual confirmation indicates \
+            a high likelihood and warrants further evaluation."
+        )
+    elif questionnaire_risk_category in ["Medium Risk", "High Risk"]:
+        explanation_summary = (
+            f"The assessment result is based primarily on the questionnaire, which indicated {questionnaire_risk_category.lower()} \
+            and showed {red_flags_count} red flags. The video analysis did not show signs of stimming behavior (classified as Non-ASD)."
+        )
+    elif video_analysis_outcome == "ASD":
+        explanation_summary = (
+            f"Although the questionnaire result was {questionnaire_risk_category.lower()}, the video analysis detected \
+            behavioral indicators (classified as ASD). This discrepancy should be discussed with a developmental specialist."
+        )
+    else:
+        explanation_summary = (
+            f"Both the questionnaire and video assessment suggest generally typical development."
+        )
+
+    # Send email with results
+    try:
+        to_email = user_info.get('parent_email')
+        subject = f"Assessment Report for {user_info.get('child_name')}"
+        report_html = render_template("email_template.html",
+                                      final_prediction=final_prediction,
+                                      final_red_flags_count=red_flags_count,
+                                      questionnaire_risk_category=questionnaire_risk_category,
+                                      video_analysis_outcome=video_analysis_outcome,
+                                      video_analysis_reason=video_analysis_reason,
+                                      flagged_questions=flagged_questions_details,
+                                      child_name=user_info.get('child_name'),
+                                      parent_name=user_info.get('parent_name'),
+                                      explanation_summary=explanation_summary)
+        send_report_email(to_email, subject, report_html)
+    except Exception as e:
+        app.logger.warning(f"Failed to send email: {e}")
+
+    return render_template("final_results.html",
+                           final_prediction=final_prediction,
+                           final_red_flags_count=red_flags_count,
+                           questionnaire_risk_category=questionnaire_risk_category,
+                           video_analysis_outcome=video_analysis_outcome,
+                           video_analysis_reason=video_analysis_reason,
+                           flagged_questions=flagged_questions_details,
+                           user_info=user_info,
+                           child_name=user_info.get('child_name'),
+                           parent_name=user_info.get('parent_name'),
+                           parent_email=user_info.get('parent_email'),
+                           explanation_summary=explanation_summary,
+			   combined_score=session.get('combined_score', 0))
+
+@app.route('/submit-assessment', methods=['GET'])
+def submit_assessment():
+    """
+    This route handles the case where a user chooses to skip the video assessment
+    and proceeds directly to the combined results.
+    """
+    if 'user_info' not in session or 'questionnaire_risk_category' not in session:
+        return redirect(url_for('home'))
+
+    # Set the final prediction based *only* on questionnaire results if video was skipped
+    final_prediction_from_qr = session['questionnaire_risk_category'].replace(' Risk', ' Likelihood')
+    session['final_prediction'] = final_prediction_from_qr
+    session['video_analysis_outcome'] = "Video assessment skipped."
+    session['video_analysis_reason'] = "No video was provided for analysis."
+    session['combined_score'] = session.get('questionnaire_red_flags_count', 0) # Use questionnaire score as combined
+
+    return redirect(url_for('show_combined_results'))
+
+
+@app.route('/thank-you', methods=['GET'])
+def thank_you_page():
+    """Renders the thank you page after assessment completion."""
+    user_info = session.get('user_info', {})
+    # It's good practice to clear the session after the user has completed the entire flow
+    # or if they explicitly choose to start a new assessment.
+    # For now, let's keep it here.
+    # session.clear()
+    return render_template('thank_you.html',
+                           child_name=user_info.get('child_name'),
+                           parent_name=user_info.get('parent_name'),
+                           parent_email=user_info.get('parent_email'))
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
