@@ -36,7 +36,7 @@
         }
 
         .container {
-            max-width: 800px;
+            max-width: 820px;
             width: 100%;
             background: var(--card-bg);
             backdrop-filter: blur(20px);
@@ -51,7 +51,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .header { text-align: center; margin-bottom: 28px; }
+        .header { text-align: center; margin-bottom: 24px; }
 
         .header-badge {
             display: inline-flex;
@@ -80,11 +80,48 @@
             margin: 0 auto;
         }
 
+        /* Mode Selector Tabs */
+        .mode-tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            background: #f1f5f9;
+            padding: 6px;
+            border-radius: var(--radius-md);
+            margin-bottom: 24px;
+        }
+
+        .tab-btn {
+            padding: 12px;
+            border: none;
+            background: transparent;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--muted-text);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .tab-btn.active {
+            background: #ffffff;
+            color: var(--primary);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
         /* Drag & Drop Box */
         .dropzone {
             border: 2px dashed #cbd5e1;
             border-radius: var(--radius-md);
-            padding: 40px 20px;
+            padding: 36px 20px;
             text-align: center;
             background: #f8fafc;
             cursor: pointer;
@@ -99,13 +136,13 @@
         }
 
         .dropzone i {
-            font-size: 3rem;
+            font-size: 2.8rem;
             color: var(--primary);
-            margin-bottom: 14px;
+            margin-bottom: 12px;
         }
 
         .dropzone h3 {
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             font-weight: 700;
             color: var(--dark-text);
             margin-bottom: 6px;
@@ -123,6 +160,98 @@
             cursor: pointer;
         }
 
+        /* Webcam Recording Container */
+        .webcam-box {
+            background: #0f172a;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 20px;
+            min-height: 320px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        video.viewfinder {
+            width: 100%;
+            max-height: 360px;
+            background: #000;
+            display: block;
+            object-fit: cover;
+        }
+
+        .webcam-overlay-badge {
+            position: absolute;
+            top: 14px;
+            left: 14px;
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .rec-dot {
+            width: 10px;
+            height: 10px;
+            background: white;
+            border-radius: 50%;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .webcam-controls {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .btn-cam-action {
+            padding: 12px 24px;
+            border-radius: var(--radius-md);
+            border: none;
+            font-weight: 700;
+            font-size: 0.92rem;
+            font-family: inherit;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-rec-start {
+            background: #ef4444;
+            color: white;
+            box-shadow: 0 6px 15px rgba(239, 68, 68, 0.3);
+        }
+        .btn-rec-start:hover { background: #dc2626; }
+
+        .btn-rec-stop {
+            background: #64748b;
+            color: white;
+        }
+        .btn-rec-stop:hover { background: #475569; }
+
+        .btn-cam-retake {
+            background: #f1f5f9;
+            color: var(--muted-text);
+            border: 1px solid #cbd5e1;
+        }
+        .btn-cam-retake:hover { background: #e2e8f0; color: var(--dark-text); }
+
         /* Video Preview Area */
         .preview-container {
             display: none;
@@ -130,12 +259,6 @@
             border-radius: var(--radius-md);
             overflow: hidden;
             background: #0f172a;
-        }
-
-        video {
-            width: 100%;
-            max-height: 360px;
-            display: block;
         }
 
         .file-info-badge {
@@ -288,7 +411,7 @@
                 <i class="fa-solid fa-microchip"></i> Spatio-Temporal Deep Learning
             </div>
             <h1>AI Video Behavior Analysis</h1>
-            <p>Upload a short video clip of <strong>{{ child_name }}</strong> engaging in play or movement activities for automated stimming detection.</p>
+            <p>Upload or record a short video clip of <strong>{{ child_name }}</strong> engaging in play or movement activities for automated stimming detection.</p>
         </div>
 
         {% if upload_message %}
@@ -297,14 +420,56 @@
         </div>
         {% endif %}
 
+        <!-- Mode Selector Tabs -->
+        <div class="mode-tabs">
+            <button type="button" class="tab-btn active" id="tab-file-btn" onclick="switchMode('file')">
+                <i class="fa-solid fa-cloud-arrow-up"></i> Upload File
+            </button>
+            <button type="button" class="tab-btn" id="tab-cam-btn" onclick="switchMode('camera')">
+                <i class="fa-solid fa-video"></i> Record with Camera
+            </button>
+        </div>
+
         <form id="upload-form" action="/upload-video" method="POST" enctype="multipart/form-data">
-            <div class="dropzone" id="dropzone">
-                <i class="fa-solid fa-cloud-arrow-up"></i>
-                <h3>Drag & Drop Video File Here</h3>
-                <p>Supports MP4, AVI, MOV, MKV (Up to 50 MB)</p>
-                <input type="file" name="video_file" id="video_file" class="file-input" accept=".mp4,.avi,.mov,.mkv" required>
+            <!-- Hidden Input for Webcam Blob -->
+            <input type="file" name="video_file" id="video_file" style="display: none;">
+
+            <!-- Tab 1: File Upload -->
+            <div class="tab-content active" id="tab-file-content">
+                <div class="dropzone" id="dropzone">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                    <h3>Drag & Drop Video File Here</h3>
+                    <p>Supports MP4, AVI, MOV, MKV, WEBM (Up to 50 MB)</p>
+                    <input type="file" id="file_picker" class="file-input" accept=".mp4,.avi,.mov,.mkv,.webm">
+                </div>
             </div>
 
+            <!-- Tab 2: Webcam Recording -->
+            <div class="tab-content" id="tab-cam-content">
+                <div class="webcam-box">
+                    <video id="webcam-viewfinder" class="viewfinder" autoplay playsinline muted></video>
+                    <div class="webcam-overlay-badge" id="rec-badge" style="display: none;">
+                        <div class="rec-dot"></div> REC <span id="rec-timer">00:00</span>
+                    </div>
+                </div>
+
+                <div class="webcam-controls">
+                    <button type="button" class="btn-cam-action btn-cam-retake" id="btn-start-cam" onclick="initCamera()">
+                        <i class="fa-solid fa-power-off"></i> Turn On Camera
+                    </button>
+                    <button type="button" class="btn-cam-action btn-rec-start" id="btn-start-rec" style="display: none;" onclick="startRecording()">
+                        <i class="fa-solid fa-circle"></i> Start 15s Recording
+                    </button>
+                    <button type="button" class="btn-cam-action btn-rec-stop" id="btn-stop-rec" style="display: none;" onclick="stopRecording()">
+                        <i class="fa-solid fa-square"></i> Stop Recording
+                    </button>
+                    <button type="button" class="btn-cam-action btn-cam-retake" id="btn-retake-rec" style="display: none;" onclick="initCamera()">
+                        <i class="fa-solid fa-rotate-left"></i> Retake Video
+                    </button>
+                </div>
+            </div>
+
+            <!-- Video Preview Box -->
             <div class="preview-container" id="preview-container">
                 <video id="video-preview" controls></video>
             </div>
@@ -345,7 +510,8 @@
     </div>
 
     <script>
-        const fileInput = document.getElementById('video_file');
+        const filePicker = document.getElementById('file_picker');
+        const hiddenFileInput = document.getElementById('video_file');
         const dropzone = document.getElementById('dropzone');
         const previewContainer = document.getElementById('preview-container');
         const videoPreview = document.getElementById('video-preview');
@@ -356,37 +522,151 @@
         const overlay = document.getElementById('processing-overlay');
         const statusStep = document.getElementById('status-step');
 
-        fileInput.addEventListener('change', handleFileSelect);
+        // Mode Switching
+        function switchMode(mode) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
 
-        function handleFileSelect(e) {
-            const file = fileInput.files[0];
-            if (file) {
-                fileName.textContent = file.name;
-                fileSize.textContent = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
-                fileInfo.style.display = 'flex';
-
-                const url = URL.createObjectURL(file);
-                videoPreview.src = url;
-                previewContainer.style.display = 'block';
+            if (mode === 'file') {
+                document.getElementById('tab-file-btn').classList.add('active');
+                document.getElementById('tab-file-content').classList.add('active');
+                stopCameraStream();
+            } else {
+                document.getElementById('tab-cam-btn').classList.add('active');
+                document.getElementById('tab-cam-content').classList.add('active');
             }
         }
 
-        // Drag & Drop visual feedback
-        ['dragenter', 'dragover'].forEach(eventName => {
-            dropzone.addEventListener(eventName, (e) => {
-                e.preventDefault();
-                dropzone.classList.add('dragover');
-            }, false);
+        // File Picker Selection
+        filePicker.addEventListener('change', () => {
+            if (filePicker.files.length > 0) {
+                const file = filePicker.files[0];
+                setVideoFile(file);
+            }
         });
 
-        ['dragleave', 'drop'].forEach(eventName => {
-            dropzone.addEventListener(eventName, (e) => {
-                e.preventDefault();
-                dropzone.classList.remove('dragover');
-            }, false);
-        });
+        function setVideoFile(file) {
+            // Transfer file to hidden input using DataTransfer
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            hiddenFileInput.files = dt.files;
 
-        uploadForm.addEventListener('submit', function() {
+            fileName.textContent = file.name;
+            fileSize.textContent = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+            fileInfo.style.display = 'flex';
+
+            const url = URL.createObjectURL(file);
+            videoPreview.src = url;
+            previewContainer.style.display = 'block';
+        }
+
+        // --- WebRTC Camera & MediaRecorder Logic ---
+        let mediaStream = null;
+        let mediaRecorder = null;
+        let recordedChunks = [];
+        let timerInterval = null;
+        let secondsRecorded = 0;
+
+        const webcamViewfinder = document.getElementById('webcam-viewfinder');
+        const recBadge = document.getElementById('rec-badge');
+        const recTimer = document.getElementById('rec-timer');
+        const btnStartCam = document.getElementById('btn-start-cam');
+        const btnStartRec = document.getElementById('btn-start-rec');
+        const btnStopRec = document.getElementById('btn-stop-rec');
+        const btnRetakeRec = document.getElementById('btn-retake-rec');
+
+        async function initCamera() {
+            try {
+                stopCameraStream();
+                recordedChunks = [];
+                previewContainer.style.display = 'none';
+
+                mediaStream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: { ideal: 1280 }, height: { ideal: 720 } },
+                    audio: false
+                });
+                webcamViewfinder.srcObject = mediaStream;
+                webcamViewfinder.style.display = 'block';
+
+                btnStartCam.style.display = 'none';
+                btnStartRec.style.display = 'flex';
+                btnStopRec.style.display = 'none';
+                btnRetakeRec.style.display = 'none';
+                recBadge.style.display = 'none';
+            } catch (err) {
+                alert('Camera access denied or unavailable: ' + err.message);
+            }
+        }
+
+        function stopCameraStream() {
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(track => track.stop());
+                mediaStream = null;
+            }
+        }
+
+        function startRecording() {
+            if (!mediaStream) return;
+
+            recordedChunks = [];
+            let options = { mimeType: 'video/webm;codecs=vp8' };
+            if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                options = { mimeType: 'video/webm' };
+            }
+
+            mediaRecorder = new MediaRecorder(mediaStream, options);
+
+            mediaRecorder.ondataavailable = (event) => {
+                if (event.data && event.data.size > 0) {
+                    recordedChunks.push(event.data);
+                }
+            };
+
+            mediaRecorder.onstop = () => {
+                clearInterval(timerInterval);
+                const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                const recordedFile = new File([blob], `webcam_recording_${Date.now()}.webm`, { type: 'video/webm' });
+                setVideoFile(recordedFile);
+
+                webcamViewfinder.style.display = 'none';
+                recBadge.style.display = 'none';
+                btnStopRec.style.display = 'none';
+                btnRetakeRec.style.display = 'flex';
+                stopCameraStream();
+            };
+
+            mediaRecorder.start(1000);
+            secondsRecorded = 0;
+            recBadge.style.display = 'flex';
+            btnStartRec.style.display = 'none';
+            btnStopRec.style.display = 'flex';
+
+            timerInterval = setInterval(() => {
+                secondsRecorded++;
+                const mins = String(Math.floor(secondsRecorded / 60)).padStart(2, '0');
+                const secs = String(secondsRecorded % 60).padStart(2, '0');
+                recTimer.textContent = `${mins}:${secs}`;
+
+                if (secondsRecorded >= 30) {
+                    stopRecording();
+                }
+            }, 1000);
+        }
+
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+            }
+        }
+
+        // Form Submit Validation & Processing Overlay
+        uploadForm.addEventListener('submit', function(e) {
+            if (!hiddenFileInput.files || hiddenFileInput.files.length === 0) {
+                e.preventDefault();
+                alert('Please upload a video file or record a clip using your camera before submitting.');
+                return;
+            }
+
             overlay.style.display = 'flex';
             const steps = [
                 "Uniformly sampling 16 keyframes from video tensor...",

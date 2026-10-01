@@ -37,7 +37,7 @@ mail = Mail(app)
 
 # --- Configuration for Video Upload ---
 UPLOAD_FOLDER = 'uploads'
-ALLOWED_EXTENSIONS = {'mp4', 'avi', 'mov', 'mkv'}
+ALLOWED_EXTENSIONS = {'mp4', 'avi', 'mov', 'mkv', 'webm'}
 MAX_FILE_SIZE = 100 * 1024 * 1024 # 100 MB
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
