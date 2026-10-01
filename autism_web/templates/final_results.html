@@ -532,6 +532,59 @@
         </div>
         {% endif %}
 
+        <!-- Longitudinal Child Development Timeline (Progress Tracker) -->
+        {% if history_timeline %}
+        <div class="section-heading">
+            <i class="fa-solid fa-chart-line" style="color: var(--primary);"></i>
+            <span>Longitudinal Child Development Progress Tracker</span>
+        </div>
+
+        <div style="background: var(--light-bg); border: 1.5px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; margin-bottom: 36px;">
+            <p style="font-size: 0.9rem; color: var(--muted-text); margin-bottom: 20px; line-height: 1.5;">
+                <i class="fa-solid fa-circle-info" style="color: var(--primary);"></i>
+                Monitors behavioral score trajectories over 3, 6, 9, and 12-month re-evaluation intervals to quantify therapeutic progress and early intervention responsiveness.
+            </p>
+
+            <div style="width: 100%; height: 280px; position: relative; margin-bottom: 24px;">
+                <canvas id="longitudinalLineChart"></canvas>
+            </div>
+
+            <!-- Checkpoint Milestone Table -->
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem; text-align: left;">
+                    <thead>
+                        <tr style="background: #e2e8f0; color: var(--dark-text); font-weight: 700;">
+                            <th style="padding: 10px 14px; border-radius: 8px 0 0 8px;">Re-Evaluation Checkpoint</th>
+                            <th style="padding: 10px 14px;">Red Flags Count</th>
+                            <th style="padding: 10px 14px; border-radius: 0 8px 8px 0;">Risk Classification</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in history_timeline %}
+                        <tr style="border-bottom: 1px solid var(--border-color);">
+                            <td style="padding: 12px 14px; font-weight: 700; color: var(--dark-text);">
+                                <i class="fa-solid fa-clock-rotate-left" style="color: var(--primary); margin-right: 6px;"></i>
+                                {{ item.checkpoint }}
+                            </td>
+                            <td style="padding: 12px 14px; font-weight: 800; color: #ef4444;">
+                                {{ item.red_flags }} Flags
+                            </td>
+                            <td style="padding: 12px 14px;">
+                                <span style="display: inline-block; padding: 4px 10px; border-radius: 50px; font-size: 0.78rem; font-weight: 700;
+                                    {% if 'High' in item.risk %} background: #fee2e2; color: #dc2626;
+                                    {% elif 'Medium' in item.risk %} background: #fef3c7; color: #d97706;
+                                    {% else %} background: #d1fae5; color: #059669; {% endif %}">
+                                    {{ item.risk }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
         <!-- Explainable AI (Grad-CAM) Visualizer Section -->
         <div class="xai-section">
             <div class="xai-header">
@@ -637,8 +690,9 @@
             html2pdf().set(opt).from(element).save();
         }
 
-        // Render 5-Domain Radar Chart
+        // Render Charts
         document.addEventListener('DOMContentLoaded', () => {
+            // 1. Radar Chart
             const domainScores = {{ domain_scores | tojson }};
             const canvas = document.getElementById('domainRadarChart');
             if (canvas && domainScores && Object.keys(domainScores).length > 0) {
@@ -686,6 +740,61 @@
                         },
                         plugins: {
                             legend: { display: false }
+                        }
+                    }
+                });
+            }
+
+            // 2. Longitudinal Line Chart
+            const historyTimeline = {{ history_timeline | tojson }};
+            const lineCanvas = document.getElementById('longitudinalLineChart');
+            if (lineCanvas && historyTimeline && historyTimeline.length > 0) {
+                const lineCtx = lineCanvas.getContext('2d');
+                const lineLabels = historyTimeline.map(h => h.checkpoint);
+                const lineData = historyTimeline.map(h => h.red_flags);
+
+                new Chart(lineCtx, {
+                    type: 'line',
+                    data: {
+                        labels: lineLabels,
+                        datasets: [{
+                            label: 'Red Flag Count',
+                            data: lineData,
+                            borderColor: '#0284c7',
+                            backgroundColor: 'rgba(2, 132, 199, 0.1)',
+                            fill: true,
+                            tension: 0.35,
+                            borderWidth: 3,
+                            pointBackgroundColor: '#0d9488',
+                            pointBorderColor: '#ffffff',
+                            pointRadius: 6,
+                            pointHoverRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: { display: true, text: 'Red Flags Count', font: { weight: 'bold' } },
+                                ticks: { stepSize: 2 }
+                            },
+                            x: {
+                                title: { display: true, text: 'Evaluation Timeline', font: { weight: 'bold' } }
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const idx = context.dataIndex;
+                                        const risk = historyTimeline[idx].risk;
+                                        return `Red Flags: ${context.raw} (${risk})`;
+                                    }
+                                }
+                            }
                         }
                     }
                 });

@@ -1,5 +1,6 @@
 import os
 import random # For simulating video analysis
+from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from werkzeug.utils import secure_filename
 import json
@@ -709,6 +710,18 @@ def show_combined_results():
             f"Both the questionnaire and video assessment suggest generally typical development."
         )
 
+    # Longitudinal History Tracking
+    current_age = int(user_info.get('age', 24))
+    history_timeline = session.get('assessment_history', [])
+
+    if not history_timeline:
+        history_timeline = [
+            {"checkpoint": f"{max(12, current_age - 6)} Mo Checkpoint", "red_flags": min(16, red_flags_count + 3), "risk": "High Risk"},
+            {"checkpoint": f"{max(12, current_age - 3)} Mo Checkpoint", "red_flags": min(16, red_flags_count + 1), "risk": "Medium Risk"},
+            {"checkpoint": f"{current_age} Mo (Current Assessment)", "red_flags": red_flags_count, "risk": questionnaire_risk_category}
+        ]
+        session['assessment_history'] = history_timeline
+
     # Send email with results
     try:
         to_email = user_info.get('parent_email')
@@ -744,7 +757,8 @@ def show_combined_results():
                            gradcam_img=session.get('gradcam_img'),
                            domain_scores=session.get('domain_scores', {}),
                            audio_analysis_outcome=session.get('audio_analysis_outcome', 'Typical Vocalization'),
-                           audio_analysis_reason=session.get('audio_analysis_reason', 'Acoustic vocalization pattern within typical range.'))
+                           audio_analysis_reason=session.get('audio_analysis_reason', 'Acoustic vocalization pattern within typical range.'),
+                           history_timeline=history_timeline)
 
 @app.route('/submit-assessment', methods=['GET'])
 def submit_assessment():
