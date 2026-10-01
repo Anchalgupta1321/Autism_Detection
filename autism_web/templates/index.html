@@ -324,6 +324,39 @@
             to { opacity: 1; transform: translateX(0); }
         }
 
+        .lang-selector-pill {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            padding: 6px 14px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: white;
+            font-weight: 700;
+            font-size: 0.85rem;
+            z-index: 100;
+        }
+
+        .lang-selector-pill select {
+            background: transparent;
+            border: none;
+            color: white;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .lang-selector-pill select option {
+            background: #0f172a;
+            color: white;
+        }
+
         /* Responsive Layout */
         @media (max-width: 900px) {
             .main-wrapper {
@@ -346,6 +379,15 @@
     </style>
 </head>
 <body>
+
+    <div class="lang-selector-pill">
+        <i class="fa-solid fa-globe"></i>
+        <select id="lang-select" onchange="switchAppLanguage(this.value)">
+            <option value="en">English (US)</option>
+            <option value="es">Español</option>
+            <option value="hi">हिन्दी</option>
+        </select>
+    </div>
 
     <div class="main-wrapper">
         <!-- Hero Information Side -->
@@ -456,7 +498,7 @@
                 </div>
 
                 <button type="submit" class="submit-btn">
-                    <span>Begin Questionnaire</span>
+                    <span data-i18n="btnBegin">Begin Questionnaire</span>
                     <i class="fa-solid fa-arrow-right"></i>
                 </button>
 
@@ -467,5 +509,43 @@
         </div>
     </div>
 
+    <script>
+        const i18nDict = {
+            en: {
+                btnBegin: "Begin Questionnaire",
+                startAss: "Start Assessment"
+            },
+            es: {
+                btnBegin: "Comenzar Cuestionario",
+                startAss: "Iniciar Evaluación"
+            },
+            hi: {
+                btnBegin: "प्रश्नावली शुरू करें",
+                startAss: "जांच शुरू करें"
+            }
+        };
+
+        function switchAppLanguage(lang) {
+            localStorage.setItem('app_lang', lang);
+            applyLanguage(lang);
+        }
+
+        function applyLanguage(lang) {
+            const dict = i18nDict[lang] || i18nDict.en;
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (dict[key]) {
+                    el.textContent = dict[key];
+                }
+            });
+            const sel = document.getElementById('lang-select');
+            if (sel) sel.value = lang;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedLang = localStorage.getItem('app_lang') || 'en';
+            applyLanguage(savedLang);
+        });
+    </script>
 </body>
 </html>
