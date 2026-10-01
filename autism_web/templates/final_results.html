@@ -427,6 +427,9 @@
                 <i class="fa-solid fa-brain-circuit"></i> AutoDetect AI Clinical Portal
             </div>
             <div class="action-btns">
+                <button onclick="toggleSpeechSynthesis()" id="ttsBtn" class="btn-action btn-print">
+                    <i class="fa-solid fa-volume-high"></i> Listen to Summary
+                </button>
                 <button onclick="shareReportLink()" class="btn-action btn-print">
                     <i class="fa-solid fa-share-nodes"></i> Share with Doctor
                 </button>
@@ -665,6 +668,58 @@
     </div>
 
     <script>
+        function toggleSpeechSynthesis() {
+            if (!('speechSynthesis' in window)) {
+                alert("Text-to-Speech is not supported in this browser. Please use Chrome, Edge, Safari, or Firefox.");
+                return;
+            }
+            const btn = document.getElementById('ttsBtn');
+            if (window.speechSynthesis.speaking) {
+                window.speechSynthesis.cancel();
+                btn.innerHTML = '<i class="fa-solid fa-volume-high"></i> Listen to Summary';
+                btn.style.background = '#f1f5f9';
+                btn.style.color = 'var(--muted-text)';
+                return;
+            }
+
+            const childName = "{{ child_name }}";
+            const verdict = "{{ final_prediction }}";
+            const summary = "{{ explanation_summary | replace('\"', '') | replace('\n', ' ') }}";
+            const redFlags = "{{ final_red_flags_count }}";
+            const qrCategory = "{{ questionnaire_risk_category }}";
+            const videoOutcome = "{{ video_analysis_outcome }}";
+            const audioOutcome = "{{ audio_analysis_outcome }}";
+
+            const textToRead = `Diagnostic Assessment Summary for ${childName}. Consensus Likelihood: ${verdict}. ${summary} ` +
+                               `Questionnaire evaluation identified ${redFlags} behavioral red flags categorized as ${qrCategory}. ` +
+                               `Deep learning stimming video outcome: ${videoOutcome}. Acoustic vocalization outcome: ${audioOutcome}. ` +
+                               `Please consult a developmental pediatrician for a formal evaluation.`;
+
+            const utterance = new SpeechSynthesisUtterance(textToRead);
+            utterance.rate = 0.95;
+            utterance.pitch = 1.0;
+
+            utterance.onstart = () => {
+                btn.innerHTML = '<i class="fa-solid fa-square-stop"></i> Stop Audio';
+                btn.style.background = '#fee2e2';
+                btn.style.color = '#dc2626';
+            };
+
+            utterance.onend = () => {
+                btn.innerHTML = '<i class="fa-solid fa-volume-high"></i> Listen to Summary';
+                btn.style.background = '#f1f5f9';
+                btn.style.color = 'var(--muted-text)';
+            };
+
+            utterance.onerror = () => {
+                btn.innerHTML = '<i class="fa-solid fa-volume-high"></i> Listen to Summary';
+                btn.style.background = '#f1f5f9';
+                btn.style.color = 'var(--muted-text)';
+            };
+
+            window.speechSynthesis.speak(utterance);
+        }
+
         function shareReportLink() {
             const url = window.location.href;
             if (navigator.clipboard && navigator.clipboard.writeText) {
