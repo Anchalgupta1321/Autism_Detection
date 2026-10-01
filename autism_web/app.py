@@ -1,4 +1,6 @@
 import os
+from dotenv import load_dotenv
+load_dotenv()
 import random # For simulating video analysis
 from datetime import datetime
 import io
