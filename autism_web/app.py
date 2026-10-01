@@ -1,7 +1,8 @@
 import os
 import random # For simulating video analysis
 from datetime import datetime
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+import io
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_file
 from werkzeug.utils import secure_filename
 import json
 import secrets # For generating a strong secret key
@@ -14,6 +15,10 @@ from PIL import Image
 import numpy as np
 from torchvision.models import MobileNet_V2_Weights
 
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib import colors
 
 import gc
 
@@ -421,12 +426,190 @@ def serve_upload(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 
-def send_report_email(to_email, subject, report_html):
+def generate_pdf_report_bytes(user_info, final_prediction, questionnaire_risk_category, red_flags_count,
+                              video_analysis_outcome, video_analysis_reason,
+                              audio_analysis_outcome, audio_analysis_reason,
+                              explanation_summary, flagged_questions_details):
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=36, leftMargin=36, topMargin=36, bottomMargin=36)
+    styles = getSampleStyleSheet()
+
+    title_style = ParagraphStyle(
+        'DocTitle',
+        parent=styles['Heading1'],
+        fontName='Helvetica-Bold',
+        fontSize=18,
+        textColor=colors.HexColor('#0d9488'),
+        alignment=1,
+        spaceAfter=6
+    )
+
+    subtitle_style = ParagraphStyle(
+        'DocSubtitle',
+        parent=styles['Normal'],
+        fontName='Helvetica',
+        fontSize=10,
+        textColor=colors.HexColor('#475569'),
+        alignment=1,
+        spaceAfter=14
+    )
+
+    h2_style = ParagraphStyle(
+        'Heading2Custom',
+        parent=styles['Heading2'],
+        fontName='Helvetica-Bold',
+        fontSize=12,
+        textColor=colors.HexColor('#0f172a'),
+        spaceBefore=10,
+        spaceAfter=6
+    )
+
+    body_style = ParagraphStyle(
+        'BodyCustom',
+        parent=styles['Normal'],
+        fontName='Helvetica',
+        fontSize=9.5,
+        textColor=colors.HexColor('#1e293b'),
+        leading=13
+    )
+
+    verdict_style = ParagraphStyle(
+        'VerdictText',
+        parent=styles['Heading1'],
+        fontName='Helvetica-Bold',
+        fontSize=14,
+        textColor=colors.white,
+        alignment=1,
+        spaceAfter=4
+    )
+
+    verdict_sub_style = ParagraphStyle(
+        'VerdictSubText',
+        parent=styles['Normal'],
+        fontName='Helvetica',
+        fontSize=9,
+        textColor=colors.white,
+        alignment=1,
+        leading=12
+    )
+
+    child_name = user_info.get('child_name', 'Patient')
+    parent_name = user_info.get('parent_name', 'Caregiver')
+    parent_email = user_info.get('parent_email', 'N/A')
+    age = user_info.get('age', '24')
+    gender = str(user_info.get('gender', 'N/A')).capitalize()
+
+    story = [
+        Paragraph('AutoDetect AI – Diagnostic Assessment Report', title_style),
+        Paragraph('Multimodal ASD Early Detection Pipeline (M-CHAT-R/F + MobileNetV2-LSTM Neural Network)', subtitle_style),
+        HRFlowable(width='100%', thickness=1.5, color=colors.HexColor('#0d9488'), spaceAfter=14),
+    ]
+
+    verdict_bg = colors.HexColor('#10b981')
+    if 'High' in final_prediction:
+        verdict_bg = colors.HexColor('#ef4444')
+    elif 'Low' in final_prediction:
+        verdict_bg = colors.HexColor('#f59e0b')
+
+    verdict_data = [[
+        Paragraph(f"DIAGNOSTIC CONSENSUS LIKELIHOOD: {final_prediction.upper()}", verdict_style),
+    ], [
+        Paragraph(explanation_summary, verdict_sub_style)
+    ]]
+
+    verdict_table = Table(verdict_data, colWidths=[540])
+    verdict_table.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,-1), verdict_bg),
+        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+        ('TOPPADDING', (0,0), (-1,-1), 10),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 10),
+        ('LEFTPADDING', (0,0), (-1,-1), 14),
+        ('RIGHTPADDING', (0,0), (-1,-1), 14),
+    ]))
+    story.append(verdict_table)
+    story.append(Spacer(1, 14))
+
+    meta_data = [
+        [Paragraph('<b>Child Patient:</b>', body_style), Paragraph(f"{child_name} ({age} Mo | {gender})", body_style)],
+        [Paragraph('<b>Caregiver Contact:</b>', body_style), Paragraph(f"{parent_name} ({parent_email})", body_style)],
+        [Paragraph('<b>Assessment Date:</b>', body_style), Paragraph('Completed', body_style)]
+    ]
+    meta_table = Table(meta_data, colWidths=[150, 390])
+    meta_table.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,-1), colors.HexColor('#f8fafc')),
+        ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor('#e2e8f0')),
+        ('PADDING', (0,0), (-1,-1), 6),
+    ]))
+    story.append(meta_table)
+    story.append(Spacer(1, 14))
+
+    story.append(Paragraph('Multimodal Assessment Breakdown', h2_style))
+    modality_data = [
+        [Paragraph('<b>Modality</b>', body_style), Paragraph('<b>Outcome</b>', body_style), Paragraph('<b>Clinical Findings</b>', body_style)],
+        [
+            Paragraph('1. Behavioral Questionnaire', body_style),
+            Paragraph(f"<b>{questionnaire_risk_category}</b>", body_style),
+            Paragraph(f"Identified {red_flags_count} red flags across 5 domains.", body_style)
+        ],
+        [
+            Paragraph('2. MobileNetV2-LSTM Video AI', body_style),
+            Paragraph(f"<b>{video_analysis_outcome}</b>", body_style),
+            Paragraph(f"{video_analysis_reason}", body_style)
+        ],
+        [
+            Paragraph('3. Acoustic Vocalization AI', body_style),
+            Paragraph(f"<b>{audio_analysis_outcome}</b>", body_style),
+            Paragraph(f"{audio_analysis_reason}", body_style)
+        ]
+    ]
+    modality_table = Table(modality_data, colWidths=[140, 130, 270])
+    modality_table.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#0d9488')),
+        ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+        ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor('#cbd5e1')),
+        ('PADDING', (0,0), (-1,-1), 6),
+    ]))
+    story.append(modality_table)
+    story.append(Spacer(1, 14))
+
+    if flagged_questions_details:
+        story.append(Paragraph('Identified Behavioral Red Flags', h2_style))
+        flag_rows = [[Paragraph('<b>Domain</b>', body_style), Paragraph('<b>Flagged Question & Clinical Context</b>', body_style)]]
+        for f in flagged_questions_details:
+            flag_rows.append([
+                Paragraph(f.get('step_title', 'General'), body_style),
+                Paragraph(f"<b>{f.get('question_text')}</b><br/><i>Context: {f.get('red_flag_reasoning')}</i>", body_style)
+            ])
+        flag_table = Table(flag_rows, colWidths=[140, 400])
+        flag_table.setStyle(TableStyle([
+            ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#f1f5f9')),
+            ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor('#e2e8f0')),
+            ('PADDING', (0,0), (-1,-1), 6),
+        ]))
+        story.append(flag_table)
+        story.append(Spacer(1, 14))
+
+    rec_text = "<b>Recommended Next Steps:</b><br/>" \
+               "• Consult a Pediatrician or Developmental Specialist for a formal ADOS-2 evaluation.<br/>" \
+               "• Explore early Speech & Occupational Therapy options.<br/><br/>" \
+               "<b>Medical Disclaimer:</b> AutoDetect AI is a decision-support screening tool, not a medical diagnosis."
+    story.append(Paragraph(rec_text, body_style))
+
+    doc.build(story)
+    buffer.seek(0)
+    return buffer.getvalue()
+
+
+def send_report_email(to_email, subject, report_html, pdf_bytes=None, pdf_filename="ASD_Assessment_Report.pdf"):
     msg = Message(subject,
                   sender=app.config['MAIL_USERNAME'],
                   recipients=[to_email])
     msg.html = report_html  # Email supports rich formatting
+    if pdf_bytes:
+        msg.attach(pdf_filename, "application/pdf", pdf_bytes)
     mail.send(msg)
+
 
 
 @app.route('/', methods=['GET'])
@@ -722,10 +905,12 @@ def show_combined_results():
         ]
         session['assessment_history'] = history_timeline
 
-    # Send email with results
+    session['explanation_summary'] = explanation_summary
+
+    # Send email with HTML & PDF Attachment
     try:
         to_email = user_info.get('parent_email')
-        subject = f"Assessment Report for {user_info.get('child_name')}"
+        subject = f"Diagnostic Assessment Report for {user_info.get('child_name')}"
         report_html = render_template("email_template.html",
                                       final_prediction=final_prediction,
                                       final_red_flags_count=red_flags_count,
@@ -736,9 +921,24 @@ def show_combined_results():
                                       child_name=user_info.get('child_name'),
                                       parent_name=user_info.get('parent_name'),
                                       explanation_summary=explanation_summary)
-        send_report_email(to_email, subject, report_html)
+        
+        pdf_bytes = generate_pdf_report_bytes(
+            user_info=user_info,
+            final_prediction=final_prediction,
+            questionnaire_risk_category=questionnaire_risk_category,
+            red_flags_count=red_flags_count,
+            video_analysis_outcome=video_analysis_outcome,
+            video_analysis_reason=video_analysis_reason,
+            audio_analysis_outcome=session.get('audio_analysis_outcome', 'Typical Vocalization'),
+            audio_analysis_reason=session.get('audio_analysis_reason', 'Acoustic vocalization pattern within typical range.'),
+            explanation_summary=explanation_summary,
+            flagged_questions_details=flagged_questions_details
+        )
+        child_filename_clean = user_info.get('child_name', 'Child').replace(' ', '_')
+        pdf_name = f"ASD_Assessment_{child_filename_clean}.pdf"
+        send_report_email(to_email, subject, report_html, pdf_bytes=pdf_bytes, pdf_filename=pdf_name)
     except Exception as e:
-        app.logger.warning(f"Failed to send email: {e}")
+        app.logger.warning(f"Failed to send email with PDF attachment: {e}")
 
     return render_template("final_results.html",
                            final_prediction=final_prediction,
@@ -759,6 +959,46 @@ def show_combined_results():
                            audio_analysis_outcome=session.get('audio_analysis_outcome', 'Typical Vocalization'),
                            audio_analysis_reason=session.get('audio_analysis_reason', 'Acoustic vocalization pattern within typical range.'),
                            history_timeline=history_timeline)
+
+@app.route('/download-pdf-report', methods=['GET'])
+def download_pdf_report_route():
+    """Server-side PDF generation and direct file download endpoint."""
+    if 'user_info' not in session:
+        return redirect(url_for('home'))
+
+    user_info = session.get('user_info', {})
+    final_prediction = session.get('final_prediction', 'Unknown')
+    questionnaire_risk_category = session.get('questionnaire_risk_category', 'Unknown')
+    red_flags_count = session.get('questionnaire_red_flags_count', 0)
+    video_analysis_outcome = session.get('video_analysis_outcome', 'N/A')
+    video_analysis_reason = session.get('video_analysis_reason', 'N/A')
+    audio_analysis_outcome = session.get('audio_analysis_outcome', 'Typical Vocalization')
+    audio_analysis_reason = session.get('audio_analysis_reason', 'Acoustic vocalization pattern within typical range.')
+    flagged_questions_details = session.get('flagged_questions_details', [])
+    explanation_summary = session.get('explanation_summary', 'Multimodal diagnostic consensus evaluation completed.')
+
+    pdf_bytes = generate_pdf_report_bytes(
+        user_info=user_info,
+        final_prediction=final_prediction,
+        questionnaire_risk_category=questionnaire_risk_category,
+        red_flags_count=red_flags_count,
+        video_analysis_outcome=video_analysis_outcome,
+        video_analysis_reason=video_analysis_reason,
+        audio_analysis_outcome=audio_analysis_outcome,
+        audio_analysis_reason=audio_analysis_reason,
+        explanation_summary=explanation_summary,
+        flagged_questions_details=flagged_questions_details
+    )
+
+    child_clean = user_info.get('child_name', 'Child').replace(' ', '_')
+    filename = f"ASD_Assessment_{child_clean}.pdf"
+
+    return send_file(
+        io.BytesIO(pdf_bytes),
+        mimetype='application/pdf',
+        as_attachment=True,
+        download_name=filename
+    )
 
 @app.route('/submit-assessment', methods=['GET'])
 def submit_assessment():
@@ -783,14 +1023,11 @@ def submit_assessment():
 def thank_you_page():
     """Renders the thank you page after assessment completion."""
     user_info = session.get('user_info', {})
-    # It's good practice to clear the session after the user has completed the entire flow
-    # or if they explicitly choose to start a new assessment.
-    # For now, let's keep it here.
-    # session.clear()
     return render_template('thank_you.html',
                            child_name=user_info.get('child_name'),
                            parent_name=user_info.get('parent_name'),
                            parent_email=user_info.get('parent_email'))
+
 
 
 if __name__ == '__main__':

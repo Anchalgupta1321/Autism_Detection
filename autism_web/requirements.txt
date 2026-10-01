@@ -9,5 +9,6 @@ Pillow
 numpy
 gunicorn
 python-dotenv
+reportlab
 
 
