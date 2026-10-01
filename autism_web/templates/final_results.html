@@ -427,6 +427,9 @@
                 <i class="fa-solid fa-brain-circuit"></i> AutoDetect AI Clinical Portal
             </div>
             <div class="action-btns">
+                <button onclick="shareReportLink()" class="btn-action btn-print">
+                    <i class="fa-solid fa-share-nodes"></i> Share with Doctor
+                </button>
                 <button onclick="downloadPDF()" class="btn-action btn-download">
                     <i class="fa-solid fa-file-pdf"></i> Download PDF Report
                 </button>
@@ -595,6 +598,19 @@
     </div>
 
     <script>
+        function shareReportLink() {
+            const url = window.location.href;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(url).then(() => {
+                    alert("🔗 Report link copied to clipboard! You can share this link with your pediatrician or specialist.");
+                }).catch(() => {
+                    prompt("Copy this assessment URL for your doctor:", url);
+                });
+            } else {
+                prompt("Copy this assessment URL for your doctor:", url);
+            }
+        }
+
         function downloadPDF() {
             const element = document.getElementById('report-content');
             const opt = {
