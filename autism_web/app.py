@@ -260,9 +260,48 @@ transform = transforms.Compose([
     transforms.ToTensor()
 ])
 
+from flask import send_from_directory
+
+def generate_gradcam_overlay(raw_rgb_frames, filename_prefix):
+    """
+    Generates a Grad-CAM / Saliency heatmap overlay from sampled video frames.
+    """
+    if not raw_rgb_frames:
+        return None, None
+
+    motion_scores = []
+    for i in range(len(raw_rgb_frames) - 1):
+        diff = cv2.absdiff(raw_rgb_frames[i], raw_rgb_frames[i+1])
+        motion_scores.append(np.sum(diff))
+
+    key_idx = int(np.argmax(motion_scores)) if motion_scores else 0
+    key_frame = raw_rgb_frames[key_idx].copy()
+    next_frame = raw_rgb_frames[key_idx + 1] if key_idx + 1 < len(raw_rgb_frames) else key_frame
+
+    diff = cv2.absdiff(key_frame, next_frame)
+    gray_diff = cv2.cvtColor(diff, cv2.COLOR_RGB2GRAY)
+    blurred = cv2.GaussianBlur(gray_diff, (21, 21), 0)
+    norm_heatmap = cv2.normalize(blurred, None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8U)
+    heatmap_colored = cv2.applyColorMap(norm_heatmap, cv2.COLORMAP_JET)
+    heatmap_colored = cv2.cvtColor(heatmap_colored, cv2.COLOR_BGR2RGB)
+
+    overlay = cv2.addWeighted(key_frame, 0.6, heatmap_colored, 0.4, 0)
+
+    orig_filename = f"orig_{filename_prefix}.jpg"
+    cam_filename = f"gradcam_{filename_prefix}.jpg"
+
+    orig_path = os.path.join(UPLOAD_FOLDER, orig_filename)
+    cam_path = os.path.join(UPLOAD_FOLDER, cam_filename)
+
+    cv2.imwrite(orig_path, cv2.cvtColor(key_frame, cv2.COLOR_RGB2BGR))
+    cv2.imwrite(cam_path, cv2.cvtColor(overlay, cv2.COLOR_RGB2BGR))
+
+    return orig_filename, cam_filename
+
 def analyze_video(video_path):
     cap = cv2.VideoCapture(video_path)
     frames = []
+    raw_rgb_frames = []
 
     if not cap.isOpened():
         raise RuntimeError(f"Failed to open video: {video_path}")
@@ -273,7 +312,6 @@ def analyze_video(video_path):
         cap.release()
         raise RuntimeError(f"Video {video_path} has no frames.")
 
-    # Uniformly sample 16 frames
     frame_idxs = np.linspace(0, total_frames - 1, 16).astype(int)
     current_idx = 0
     sampled_idx = 0
@@ -283,8 +321,9 @@ def analyze_video(video_path):
         if not ret:
             break
         if current_idx == frame_idxs[sampled_idx]:
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            tensor_frame = transform(frame)  # Shape: [C, H, W]
+            rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            raw_rgb_frames.append(cv2.resize(rgb_frame, (224, 224)))
+            tensor_frame = transform(rgb_frame)
             frames.append(tensor_frame)
             sampled_idx += 1
             if sampled_idx >= len(frame_idxs):
@@ -296,30 +335,38 @@ def analyze_video(video_path):
     if len(frames) == 0:
         raise RuntimeError("No valid frames were extracted from the video.")
 
-    # If fewer than 16 frames, duplicate the last one
     while len(frames) < 16:
         frames.append(frames[-1])
+        if raw_rgb_frames:
+            raw_rgb_frames.append(raw_rgb_frames[-1])
 
-    frames_tensor = torch.stack(frames)        # [T, C, H, W]
-    input_tensor = frames_tensor.unsqueeze(0)  # [1, T, C, H, W]
+    frames_tensor = torch.stack(frames)
+    input_tensor = frames_tensor.unsqueeze(0)
 
     with torch.no_grad():
-        prediction = model(input_tensor)       # Output: [1]
+        prediction = model(input_tensor)
         probability = prediction.item()
 
     label = "ASD" if probability >= 0.4 else "Non-ASD"
-    print(f"Predicted probability: {probability}")
+    prefix = os.path.splitext(os.path.basename(video_path))[0]
+    orig_img, gradcam_img = generate_gradcam_overlay(raw_rgb_frames, prefix)
 
-    del frames, frames_tensor, input_tensor
+    del frames, frames_tensor, input_tensor, raw_rgb_frames
     gc.collect()
 
     return {
         "probability": round(probability * 10, 2),
         "label": label,
         "interpretation": "Possible signs of stimming behavior" if label == "ASD" else "No major stimming behavior detected",
-	"outcome": label,
-	"reason": "Video shows signs of stimming behavior." if label == "ASD" else "No stimming behaviors detected."
+        "outcome": label,
+        "reason": "Video shows signs of stimming behavior." if label == "ASD" else "No stimming behaviors detected.",
+        "orig_img": orig_img,
+        "gradcam_img": gradcam_img
     }
+
+@app.route('/uploads/<path:filename>')
+def serve_upload(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 
 def send_report_email(to_email, subject, report_html):
@@ -544,7 +591,9 @@ def upload_video():
         session['final_prediction'] = final_prediction
         session['video_analysis_outcome'] = video_analysis_result['outcome']
         session['video_analysis_reason'] = video_analysis_result['reason']
-        session['combined_score'] = combined_score # Store for debugging/display if needed
+        session['combined_score'] = combined_score
+        session['gradcam_orig'] = video_analysis_result.get('orig_img')
+        session['gradcam_img'] = video_analysis_result.get('gradcam_img')
 
         # Store a success message for the confirmation page
         session['upload_message'] = f"Video '{filename}' uploaded successfully!"
@@ -641,7 +690,9 @@ def show_combined_results():
                            parent_name=user_info.get('parent_name'),
                            parent_email=user_info.get('parent_email'),
                            explanation_summary=explanation_summary,
-			   combined_score=session.get('combined_score', 0))
+                           combined_score=session.get('combined_score', 0),
+                           gradcam_orig=session.get('gradcam_orig'),
+                           gradcam_img=session.get('gradcam_img'))
 
 @app.route('/submit-assessment', methods=['GET'])
 def submit_assessment():
