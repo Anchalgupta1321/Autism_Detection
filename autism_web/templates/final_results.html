@@ -11,6 +11,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- html2pdf for client-side PDF generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Chart.js for 5-Domain Radar Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         :root {
@@ -499,6 +501,20 @@
             </div>
         </div>
 
+        <!-- 5-Domain Behavioral Risk Profile (Radar Chart Analytics) -->
+        {% if domain_scores %}
+        <div class="section-heading">
+            <i class="fa-solid fa-chart-radar" style="color: var(--primary);"></i>
+            <span>5-Domain Behavioral Risk Profile (Clinical Radar Analytics)</span>
+        </div>
+
+        <div style="background: var(--light-bg); border: 1.5px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; margin-bottom: 36px; display: flex; flex-direction: column; align-items: center;">
+            <div style="width: 100%; max-width: 520px; height: 340px; position: relative;">
+                <canvas id="domainRadarChart"></canvas>
+            </div>
+        </div>
+        {% endif %}
+
         <!-- Explainable AI (Grad-CAM) Visualizer Section -->
         <div class="xai-section">
             <div class="xai-header">
@@ -590,6 +606,61 @@
             };
             html2pdf().set(opt).from(element).save();
         }
+
+        // Render 5-Domain Radar Chart
+        document.addEventListener('DOMContentLoaded', () => {
+            const domainScores = {{ domain_scores | tojson }};
+            const canvas = document.getElementById('domainRadarChart');
+            if (canvas && domainScores && Object.keys(domainScores).length > 0) {
+                const ctx = canvas.getContext('2d');
+                const labels = Object.keys(domainScores);
+                const dataValues = Object.values(domainScores);
+
+                new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Red Flag Risk Score (%)',
+                            data: dataValues,
+                            backgroundColor: 'rgba(13, 148, 136, 0.25)',
+                            borderColor: '#0d9488',
+                            borderWidth: 2.5,
+                            pointBackgroundColor: '#0284c7',
+                            pointBorderColor: '#ffffff',
+                            pointHoverBackgroundColor: '#ffffff',
+                            pointHoverBorderColor: '#0284c7',
+                            pointRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            r: {
+                                angleLines: { color: 'rgba(0, 0, 0, 0.1)' },
+                                grid: { color: 'rgba(0, 0, 0, 0.08)' },
+                                pointLabels: {
+                                    font: { family: 'Plus Jakarta Sans', size: 11, weight: '700' },
+                                    color: '#0f172a'
+                                },
+                                ticks: {
+                                    stepSize: 25,
+                                    backdropColor: 'transparent',
+                                    color: '#64748b',
+                                    callback: (v) => v + '%'
+                                },
+                                min: 0,
+                                max: 100
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    }
+                });
+            }
+        });
     </script>
 </body>
 </html>

@@ -173,38 +173,53 @@ for step_data in QUESTIONNAIRE_STEPS.values():
 def calculate_red_flags(all_answers):
     """
     Calculates the number of red flags based on user answers and predefined criteria.
-    Returns the count and a list of flagged questions with their details.
-    Each flagged question includes its domain (step) title for grouping in the results.
+    Returns total count, list of flagged questions, and per-domain risk percentage scores.
     """
     red_flags_count = 0
     flagged_questions_details = []
 
-    for question_name, criteria in RED_FLAG_CRITERIA_FLAT.items():
-        user_answer = all_answers.get(question_name)
+    domain_counts = {
+        "Social Communication": {"flagged": 0, "total": 0},
+        "Play & Imagination": {"flagged": 0, "total": 0},
+        "Behavior & Sensory": {"flagged": 0, "total": 0},
+        "Developmental History": {"flagged": 0, "total": 0},
+        "Family History": {"flagged": 0, "total": 0}
+    }
 
-        # Skip free-text field
-        if question_name == 'd1_skill_description':
-            continue
+    step_domain_map = {
+        "step1": "Social Communication",
+        "step2": "Play & Imagination",
+        "step3": "Behavior & Sensory",
+        "step4": "Developmental History",
+        "step5": "Family History"
+    }
 
-        if user_answer is not None and user_answer == criteria['red_flag_answer']:
-            # Find the domain (step) title for this question
-            step_title = next(
-                (step_data['title'] for step_data in QUESTIONNAIRE_STEPS.values()
-                 if question_name in step_data['questions']),
-                "Unknown Domain"
-            )
+    for step_key, step_data in QUESTIONNAIRE_STEPS.items():
+        domain_name = step_domain_map.get(step_key, step_data['title'])
+        for q_key, criteria in step_data['questions'].items():
+            if q_key == 'd1_skill_description':
+                continue
 
-            flagged_questions_details.append({
-                'question_name': question_name,
-                'question_text': criteria['question'],
-                'user_answer': user_answer,
-                'red_flag_reasoning': criteria['reasoning'],
-                'step_title': step_title  # 👈 Added domain title
-            })
+            domain_counts[domain_name]["total"] += 1
+            user_answer = all_answers.get(q_key)
 
-            red_flags_count += 1
+            if user_answer is not None and user_answer == criteria['red_flag_answer']:
+                domain_counts[domain_name]["flagged"] += 1
+                red_flags_count += 1
+                flagged_questions_details.append({
+                    'question_name': q_key,
+                    'question_text': criteria['question'],
+                    'user_answer': user_answer,
+                    'red_flag_reasoning': criteria['reasoning'],
+                    'step_title': step_data['title']
+                })
 
-    return red_flags_count, flagged_questions_details
+    domain_scores = {}
+    for dom_name, counts in domain_counts.items():
+        pct = round((counts["flagged"] / counts["total"] * 100)) if counts["total"] > 0 else 0
+        domain_scores[dom_name] = pct
+
+    return red_flags_count, flagged_questions_details, domain_scores
 
 
 
@@ -477,7 +492,7 @@ def submit_questionnaire_step(step_num):
         })
     else:
         # This is the final step of the questionnaire
-        red_flags_count, flagged_questions_details = calculate_red_flags(session['all_answers'])
+        red_flags_count, flagged_questions_details, domain_scores = calculate_red_flags(session['all_answers'])
 
         # Determine questionnaire-based risk
         if red_flags_count >= 15:
@@ -493,6 +508,7 @@ def submit_questionnaire_step(step_num):
         session['questionnaire_red_flags_count'] = red_flags_count
         session['flagged_questions_details'] = flagged_questions_details
         session['questionnaire_risk_category'] = questionnaire_risk_category
+        session['domain_scores'] = domain_scores
 
         return jsonify({
             'status': 'ok',
@@ -692,7 +708,8 @@ def show_combined_results():
                            explanation_summary=explanation_summary,
                            combined_score=session.get('combined_score', 0),
                            gradcam_orig=session.get('gradcam_orig'),
-                           gradcam_img=session.get('gradcam_img'))
+                           gradcam_img=session.get('gradcam_img'),
+                           domain_scores=session.get('domain_scores', {}))
 
 @app.route('/submit-assessment', methods=['GET'])
 def submit_assessment():
