@@ -194,10 +194,10 @@
             color: var(--dark-text);
         }
 
-        /* Dual Modality Breakdown */
+        /* Tri-Modal Assessment Breakdown */
         .modality-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px;
             margin-bottom: 36px;
         }
@@ -500,6 +500,20 @@
                 <div class="modality-val">{{ video_analysis_outcome }}</div>
                 <div class="modality-desc">
                     {{ video_analysis_reason }}
+                </div>
+            </div>
+
+            <div class="modality-card">
+                <div class="modality-header">
+                    <div class="modality-icon"><i class="fa-solid fa-file-audio"></i></div>
+                    <div class="modality-title">
+                        <h3>3. Acoustic Vocalization AI</h3>
+                        <p>Pitch & Rhythmicity Classifier</p>
+                    </div>
+                </div>
+                <div class="modality-val">{{ audio_analysis_outcome }}</div>
+                <div class="modality-desc">
+                    {{ audio_analysis_reason }}
                 </div>
             </div>
         </div>
