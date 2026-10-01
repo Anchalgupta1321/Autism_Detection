@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: autodetect-asd-app
+    env: python
+    buildCommand: pip install --upgrade pip && pip install -r autism_web/requirements.txt
+    startCommand: cd autism_web && gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 120
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.12
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false

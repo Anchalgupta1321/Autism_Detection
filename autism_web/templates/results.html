@@ -3,323 +3,354 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AutoDetect AI – Questionnaire Results</title>
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>AutoDetect AI – Questionnaire Risk Assessment</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        /* General Body and Container Styling */
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #0d9488 50%, #0284c7 100%);
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --primary: #0d9488;
+            --secondary: #0284c7;
+            --dark-text: #0f172a;
+            --muted-text: #475569;
+            --shadow-lg: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
+            --radius-lg: 24px;
+            --radius-md: 14px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            font-family: 'Open Sans', sans-serif;
-            margin: 0;
-            padding: 20px;
-            background: url('https://www.transparenttextures.com/patterns/paper-fibers.png') repeat, linear-gradient(to bottom right, #e6f5ff, #f3fcff);
-            background-blend-mode: overlay;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            color: var(--dark-text);
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            color: #333;
-            line-height: 1.6;
-        }
-        .container {
-            max-width: 900px;
-            margin: auto;
-            background: #fff;
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            width: 100%;
-            animation: fadeIn 1s ease-out;
-            border-top: 5px solid #00b894; /* A nice border to signify completion */
+            padding: 30px 16px;
         }
 
-        /* Fade-in Animation */
+        .container {
+            max-width: 880px;
+            width: 100%;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-lg);
+            padding: 40px;
+            box-shadow: var(--shadow-lg);
+            animation: fadeIn 0.5s ease-out;
+        }
+
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
+            from { opacity: 0; transform: translateY(15px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Headings and Paragraphs */
-        h1 {
-            color: #2c3e50;
-            font-size: 2.8em;
-            margin-bottom: 20px;
+        .header { text-align: center; margin-bottom: 30px; }
+
+        .header-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(13, 148, 136, 0.1);
+            color: var(--primary);
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-size: 0.85rem;
             font-weight: 700;
-            text-align: center;
-        }
-        h2 {
-            color: #34495e;
-            font-size: 1.8em;
-            margin-top: 30px;
-            margin-bottom: 15px;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 10px;
-            text-align: left;
-        }
-        p {
-            font-size: 1.1em;
-            margin-bottom: 10px;
-            text-align: left;
-        }
-        strong {
-            font-weight: 700;
-            color: #2c3e50;
+            margin-bottom: 12px;
         }
 
-        /* Result Display Box */
-        .result-box {
-            padding: 25px;
-            border-radius: 12px;
-            margin: 30px 0;
+        .header h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--dark-text);
+        }
+
+        /* Risk Banner */
+        .risk-banner {
+            border-radius: var(--radius-md);
+            padding: 28px;
+            text-align: center;
+            margin-bottom: 32px;
+            color: white;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .risk-banner.high-risk {
+            background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+        }
+        .risk-banner.medium-risk {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+        .risk-banner.low-risk {
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+        }
+        .risk-banner.no-risk {
+            background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+        }
+
+        .risk-banner h3 {
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .risk-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        .risk-subtitle {
+            font-size: 1.05rem;
+            opacity: 0.95;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Patient Info Card */
+        .patient-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: var(--radius-md);
+            padding: 18px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 32px;
+        }
+
+        .patient-info h4 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--dark-text);
+        }
+
+        .patient-info p {
+            font-size: 0.88rem;
+            color: var(--muted-text);
+        }
+
+        .flag-count-pill {
+            background: white;
+            border: 1px solid #cbd5e1;
+            padding: 8px 18px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--dark-text);
+        }
+
+        /* Red Flags List */
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--dark-text);
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .flags-list {
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.5em;
+            gap: 14px;
+            margin-bottom: 36px;
+        }
+
+        .flag-card {
+            background: white;
+            border: 1.5px solid #fee2e2;
+            border-left: 5px solid #ef4444;
+            border-radius: var(--radius-md);
+            padding: 18px 22px;
+        }
+
+        .flag-domain {
+            font-size: 0.78rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: #ef4444;
+            letter-spacing: 0.05em;
+            margin-bottom: 4px;
+        }
+
+        .flag-question {
+            font-size: 0.98rem;
             font-weight: 700;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            color: var(--dark-text);
+            margin-bottom: 6px;
         }
 
-        /* Specific colors for risk categories */
-        .result-box.high-risk { background-color: #e74c3c; } /* Red */
-        .result-box.medium-risk { background-color: #f39c12; } /* Orange */
-        .result-box.low-risk { background-color: #3498db; } /* Blue */
-        .result-box.no-risk { background-color: #00b894; } /* Green */
+        .flag-reason {
+            font-size: 0.88rem;
+            color: var(--muted-text);
+            font-style: italic;
+            line-height: 1.4;
+        }
 
-        .result-box p {
-            color: white;
-            margin: 5px 0;
+        .action-box {
+            background: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%);
+            border: 1px solid #bae6fd;
+            border-radius: var(--radius-md);
+            padding: 28px;
             text-align: center;
-            font-size: 1em; /* Adjust for smaller text inside the box */
-        }
-        .result-box span {
-            font-size: 1.8em; /* Larger for the risk category */
-            display: block;
-            margin-top: 10px;
         }
 
-        /* Disclaimer Section */
-        .disclaimer {
-            background-color: #fff3e0; /* Light orange for caution/disclaimer */
-            border: 1px solid #ffcc80;
-            padding: 25px;
-            border-radius: 15px;
-            text-align: left;
-            font-size: 0.95em;
-            color: #e65100; /* Dark orange */
-            line-height: 1.6;
-            margin-bottom: 30px;
-        }
-        .disclaimer h3 {
-            color: #e65100;
-            margin-top: 0;
-            margin-bottom: 15px;
-            font-size: 1.4em;
-        }
-        .disclaimer strong {
-            color: #d84315; /* Reddish orange for emphasis */
+        .action-box h3 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--dark-text);
+            margin-bottom: 8px;
         }
 
-        /* Flagged Questions Section */
-        .flagged-questions-section {
-            text-align: left;
-            margin-top: 30px;
-            margin-bottom: 30px;
-            padding: 20px;
-            border: 1px solid #eee;
-            border-radius: 10px;
-            background-color: #fcfcfc;
-        }
-        .flagged-questions-section h3 {
-            color: #2c3e50;
-            font-size: 1.5em;
-            margin-bottom: 20px;
-        }
-        .flagged-questions-list {
-            list-style-type: none;
-            padding: 0;
-        }
-        .flagged-questions-list li {
-            background-color: #ffebeb; /* Light red background for flagged items */
-            border-left: 5px solid #ff6b6b; /* Red border on the left */
-            margin-bottom: 15px;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-        .flagged-questions-list li strong {
-            display: inline;
-            font-size: 1em;
-            color: #333;
-        }
-        .flagged-questions-list li p {
-            font-size: 0.9em;
-            color: #555;
-            margin-top: 5px;
-            margin-bottom: 0;
+        .action-box p {
+            font-size: 0.95rem;
+            color: var(--muted-text);
+            margin-bottom: 24px;
+            max-width: 620px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
-        /* Action Buttons */
         .action-buttons {
-            margin-top: 30px;
             display: flex;
             justify-content: center;
-            gap: 20px; /* Space between buttons */
-            flex-wrap: wrap; /* Allow wrapping on small screens */
+            gap: 16px;
+            flex-wrap: wrap;
         }
 
-        .button {
-            display: inline-block;
-            background-color: #007bff; /* Default blue button */
+        .btn-video {
+            padding: 16px 32px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             color: white;
-            padding: 15px 30px;
-            border: none;
-            border-radius: 10px;
-            font-size: 1.1em;
-            font-weight: 600;
-            cursor: pointer;
-            text-decoration: none; /* Remove underline for links */
-            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
-            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            font-size: 1.05rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 10px 20px -5px rgba(13, 148, 136, 0.4);
+            transition: all 0.25s ease;
         }
 
-        .button:hover {
-            background-color: #0056b3; /* Darker blue on hover */
+        .btn-video:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(0, 123, 255, 0.3);
+            box-shadow: 0 15px 25px -5px rgba(13, 148, 136, 0.5);
         }
 
-        .button:active {
-            transform: translateY(0);
-            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+        .btn-skip {
+            padding: 16px 28px;
+            background: #ffffff;
+            border: 1.5px solid #cbd5e1;
+            color: var(--muted-text);
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
         }
 
-        /* Specific style for the video assessment button */
-        .video-button {
-            background-color: #28a745; /* Green */
-        }
-        .video-button:hover {
-            background-color: #218838; /* Darker green */
+        .btn-skip:hover {
+            background: #f8fafc;
+            color: var(--dark-text);
         }
 
-        /* Responsive Adjustments */
-        @media (max-width: 768px) {
-            .container {
-                padding: 30px 20px;
-            }
-            h1 {
-                font-size: 2.2em;
-            }
-            h2 {
-                font-size: 1.5em;
-            }
-            .result-box {
-                font-size: 1.2em;
-            }
-            .result-box span {
-                font-size: 1.5em;
-            }
-            .disclaimer {
-                font-size: 0.9em;
-            }
-            .button {
-                width: 80%; /* Make buttons wider on medium screens */
-                font-size: 1.1em;
-                padding: 12px 20px;
-            }
-            .action-buttons {
-                flex-direction: column; /* Stack buttons vertically */
-                gap: 15px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .container {
-                padding: 20px 15px;
-            }
-            h1 {
-                font-size: 1.8em;
-            }
-            h2 {
-                font-size: 1.3em;
-            }
-            .result-box {
-                font-size: 1em;
-            }
-            .result-box span {
-                font-size: 1.3em;
-            }
-            .disclaimer {
-                font-size: 0.85em;
-            }
-            .button {
-                width: 100%; /* Full width buttons on small screens */
-            }
+        @media (max-width: 600px) {
+            .container { padding: 24px 16px; }
+            .patient-card { flex-direction: column; text-align: center; gap: 12px; }
+            .action-buttons { flex-direction: column; }
+            .btn-video, .btn-skip { width: 100%; justify-content: center; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Questionnaire Assessment Results for {{ user_info.child_name }}</h1>
-        <p>Hello {{ user_info.parent_name }}, based on the information you provided in the questionnaire:</p>
 
-        <div class="result-box
-            {% if questionnaire_risk_category == 'High Risk' %}high-risk
-            {% elif questionnaire_risk_category == 'Medium Risk' %}medium-risk
-            {% elif questionnaire_risk_category == 'Low Risk' %}low-risk
-            {% else %}no-risk{% endif %}">
-            <p>Your child's <strong>questionnaire-based risk category</strong> is:</p>
-            <span>{{ questionnaire_risk_category }}</span>
-            <p>Total Red Flags Identified: <strong>{{ red_flags_count }}</strong></p>
+    <div class="container">
+        <div class="header">
+            <div class="header-badge">
+                <i class="fa-solid fa-chart-pie"></i> Clinical Screening Results
+            </div>
+            <h1>Questionnaire Risk Profile</h1>
         </div>
 
-        <div class="disclaimer">
-            <h3>Important Disclaimer:</h3>
-            <p>
-                Please remember that <strong>AutoDetect AI is a screening tool only</strong> and is not capable of providing a medical diagnosis.
-                Autism Spectrum Disorder can only be diagnosed by qualified healthcare professionals (e.g., developmental pediatricians, child psychologists, neurologists).
+        <!-- Risk Category Banner -->
+        <div class="risk-banner {{ questionnaire_risk_category | lower | replace(' ', '-') }}">
+            <h3>Questionnaire Screening Tier</h3>
+            <div class="risk-title">{{ questionnaire_risk_category }}</div>
+            <p class="risk-subtitle">
+                Identified <strong>{{ red_flags_count }} behavioral red flag indicators</strong> across M-CHAT clinical domains.
             </p>
-            <p>
-                If this assessment suggests a <strong>"Medium Risk"</strong> or <strong>"High Risk"</strong>, or if you have any concerns about your child's development, we strongly recommend that you consult with your child's pediatrician or a developmental specialist for a comprehensive evaluation. Early intervention can make a significant difference.
-            </p>
-            <p>
-                We appreciate your participation and dedication to your child's well-being.
-            </p>
+        </div>
+
+        <div class="patient-card">
+            <div class="patient-info">
+                <h4>Child: {{ user_info.child_name }}</h4>
+                <p>Age: {{ user_info.age }} Months | Caregiver: {{ user_info.parent_name }}</p>
+            </div>
+            <div class="flag-count-pill">
+                🚩 {{ red_flags_count }} Red Flags
+            </div>
         </div>
 
         {% if flagged_questions %}
-            <div class="flagged-questions-section">
-                <h3>Details of Identified Red Flags:</h3>
-                <ul class="flagged-questions-list">
-                    {% set current_title = None %}
-                    {% for flag in flagged_questions | sort(attribute='step_title') %}
-                        {% if flag.step_title != current_title %}
-                            {% if not loop.first %}<br>{% endif %}
-                            <h2>{{ flag.step_title }}</h2>
-                            {% set current_title = flag.step_title %}
-                        {% endif %}
-                        <li>
-                            <strong>Question:</strong> {{ flag.question_text }}<br>
-                            <p><strong>Your Answer:</strong> {{ flag.user_answer | title }}</p>
-                            <p><strong>Reasoning:</strong> {{ flag.red_flag_reasoning }}</p>
-                        </li>
-                    {% endfor %}
-                </ul>
+        <div class="section-title">
+            <i class="fa-solid fa-triangle-exclamation" style="color: #ef4444;"></i>
+            <span>Identified Behavioral Red Flags</span>
+        </div>
+
+        <div class="flags-list">
+            {% for item in flagged_questions %}
+            <div class="flag-card">
+                <div class="flag-domain">{{ item.step_title }}</div>
+                <div class="flag-question">{{ item.question_text }}</div>
+                <div class="flag-reason">💡 Clinical Insight: {{ item.red_flag_reasoning }}</div>
             </div>
-        {% else %}
-            <div class="flagged-questions-section">
-                <p>No specific red flags were identified in the questionnaire based on the provided answers. This is a positive indication, but remember this is an initial screening.</p>
-            </div>
+            {% endfor %}
+        </div>
         {% endif %}
 
-        <div class="action-buttons">
+        <div class="action-box">
             {% if show_video_option %}
-                <a href="{{ url_for('video_assessment_page') }}" class="button video-button">Proceed to Video Assessment</a>
+            <h3><i class="fa-solid fa-video" style="color: var(--primary);"></i> Enhance Accuracy with AI Video Analysis</h3>
+            <p>Your questionnaire score indicates moderate-to-high risk. Uploading a short 10-30 second video of {{ user_info.child_name }} allows our MobileNetV2 + LSTM deep neural network to analyze repetitive motor behaviors (stimming) for higher diagnostic precision.</p>
+            
+            <div class="action-buttons">
+                <a href="/video-assessment" class="btn-video">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                    <span>Proceed to AI Video Assessment</span>
+                </a>
+                <a href="/submit-assessment" class="btn-skip">
+                    <span>View Questionnaire Results Only</span>
+                </a>
+            </div>
+            {% else %}
+            <h3><i class="fa-solid fa-circle-check" style="color: #10b981;"></i> Assessment Complete</h3>
+            <p>Based on the clinical questionnaire, {{ user_info.child_name }} shows typical developmental indicators. Click below to view the comprehensive summary report.</p>
+            <div class="action-buttons">
+                <a href="/submit-assessment" class="btn-video">
+                    <span>View Full Clinical Report</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
             {% endif %}
-            <a href="{{ url_for('thank_you_page') }}" class="button">Complete Assessment & Exit</a>
-            <a href="{{ url_for('home') }}" class="button">Start New Assessment</a>
         </div>
     </div>
+
 </body>
 </html>

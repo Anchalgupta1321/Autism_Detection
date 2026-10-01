@@ -3,31 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AutoDetect AI – Parent Questionnaire Introduction</title>
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>AutoDetect AI – Screening Overview & Instructions</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #0d9488 50%, #0284c7 100%);
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --primary: #0d9488;
+            --secondary: #0284c7;
+            --dark-text: #0f172a;
+            --muted-text: #475569;
+            --shadow-lg: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
+            --radius-lg: 24px;
+            --radius-md: 14px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            font-family: 'Open Sans', sans-serif;
-            margin: 0;
-            padding: 20px;
-            background: url('https://www.transparenttextures.com/patterns/paper-fibers.png') repeat, linear-gradient(to bottom right, #e6f5ff, #f3fcff);
-            background-blend-mode: overlay;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            color: var(--dark-text);
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            color: #333;
+            padding: 30px 16px;
         }
+
         .container {
-            max-width: 700px;
-            margin: auto;
-            background: #fff;
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.1);
-            text-align: center;
+            max-width: 800px;
             width: 100%;
-            animation: fadeIn 1s ease-out;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-lg);
+            padding: 40px;
+            box-shadow: var(--shadow-lg);
+            animation: fadeIn 0.6s ease-out;
         }
 
         @keyframes fadeIn {
@@ -35,197 +51,249 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        h1 {
-            color: #2c3e50;
-            font-size: 2.2em;
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-        h2 {
-            font-size: 1.1em;
-            font-weight: 400;
-            color: #666;
-            margin-bottom: 20px;
-        }
-        h3 {
-            color: #2c3e50;
-            font-size: 1.3em;
-            margin-top: 30px;
-            margin-bottom: 15px;
-            font-weight: 600;
-        }
-        .intro-text {
-            font-size: 0.95em;
-            color: #555;
-            line-height: 1.6;
-            margin-bottom: 20px;
-            text-align: left;
-        }
-        .intro-text strong {
-            color: #2c3e50;
-        }
-
-        .child-info {
-            background-color: #f8fbfd;
-            border: 1px solid #e0eaf0;
-            padding: 15px 25px;
-            border-radius: 10px;
+        .header {
+            text-align: center;
             margin-bottom: 30px;
-            font-size: 1em;
-            color: #555;
-            display: inline-block;
-            text-align: left;
-        }
-        .child-info strong {
-            color: #2c3e50;
         }
 
-        /* Removed .step-indicator as it's not a question step */
-        /* .step-indicator {
-            font-size: 0.9em;
-            color: #007bff;
-            font-weight: 600;
-            margin-bottom: 25px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #eee;
-        } */
-
-        form {
-            text-align: left; /* Keep for button alignment consistency */
+        .header-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(13, 148, 136, 0.1);
+            color: var(--primary);
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 12px;
         }
 
-        /* Removed .question-group and related styles as questions are removed */
-        /* .question-group {
-            margin-bottom: 25px;
-            border: 1px solid #f0f0f0;
-            border-radius: 10px;
-            padding: 20px;
-            background-color: #fdfdfd;
+        .header h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--dark-text);
+            margin-bottom: 10px;
         }
 
-        .question-group label {
-            display: block;
-            margin-bottom: 15px;
-            font-weight: 600;
-            color: #333;
-            font-size: 1.1em;
-            line-height: 1.4;
+        .child-banner {
+            background: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%);
+            border: 1px solid #bae6fd;
+            border-radius: var(--radius-md);
+            padding: 18px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
         }
 
-        .question-group select {
-            width: 100%;
-            padding: 12px;
-            margin-top: 5px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            font-size: 1em;
-            box-sizing: border-box;
-            appearance: none;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007bff%22%20d%3D%22M287%2069.9a14.7%2014.7%200%200%200-20.8%200L146.2%20190.3%2026.3%2069.9A14.7%2014.7%200%200%200%205.5%2090.7l128.8%20128.8c5.7%205.7%2014.8%205.7%2020.5%200L287%2090.7a14.7%2014.7%200%200%200%200-20.8z%22%2F%3E%3C%2Fsvg%3E');
-            background-repeat: no-repeat;
-            background-position: right 10px center;
-            background-size: 12px;
-            cursor: pointer;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        .child-details {
+            display: flex;
+            align-items: center;
+            gap: 16px;
         }
 
-        .question-group select:focus {
-            border-color: #00aaff;
-            box-shadow: 0 0 5px rgba(0, 170, 255, 0.3);
-            outline: none;
-        } */
-
-        .start-button { /* This block needs to be uncommented and potentially adjusted */
-            margin-top: 30px;
-            background-color: #00b894;
+        .avatar-circle {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--primary);
             color: white;
-            border: none;
-            padding: 15px 20px;
-            font-size: 1.1em;
-            font-weight: 600;
-            border-radius: 10px;
-            cursor: pointer;
-            width: 85%; /* Make it full width like the submit buttons */
-            display: inline-block; /* Essential for padding/width on anchor tag */
-            text-decoration: none; /* Remove underline */
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            box-shadow: 0 4px 10px rgba(0, 184, 148, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
         }
 
-        .start-button:hover {
-            background-color: #009f7a;
+        .child-meta h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--dark-text);
+        }
+
+        .child-meta p {
+            font-size: 0.88rem;
+            color: var(--muted-text);
+        }
+
+        .domain-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .domain-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: var(--radius-md);
+            padding: 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            transition: transform 0.2s ease;
+        }
+
+        .domain-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--primary);
+        }
+
+        .domain-num {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            font-size: 0.85rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .domain-text h4 {
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: var(--dark-text);
+            margin-bottom: 4px;
+        }
+
+        .domain-text p {
+            font-size: 0.8rem;
+            color: var(--muted-text);
+        }
+
+        .guidelines-box {
+            background: #fffbe6;
+            border: 1px solid #ffe58f;
+            border-radius: var(--radius-md);
+            padding: 20px;
+            margin-bottom: 32px;
+        }
+
+        .guidelines-box h4 {
+            color: #d46b08;
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .guidelines-box p {
+            font-size: 0.88rem;
+            color: #8c4b00;
+            line-height: 1.5;
+        }
+
+        .btn-container {
+            text-align: center;
+        }
+
+        .start-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 16px 36px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.05rem;
+            border-radius: var(--radius-md);
+            box-shadow: 0 10px 20px -5px rgba(13, 148, 136, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .start-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(0, 184, 148, 0.3);
+            box-shadow: 0 15px 25px -5px rgba(13, 148, 136, 0.5);
         }
 
-        .start-button:active {
-            transform: translateY(0);
-            box-shadow: 0 4_24_4_18_17_PM_IST.png;
-        }
-
-        /* Responsive adjustments */
         @media (max-width: 600px) {
-            .container {
-                padding: 30px 20px;
-            }
-            h1 {
-                font-size: 1.8em;
-            }
-            h2 {
-                font-size: 1em;
-            }
-            h3 {
-                font-size: 1.1em;
-            }
-            .intro-text {
-                font-size: 0.85em;
-            }
-            .child-info {
-                font-size: 0.9em;
-                padding: 12px 20px;
-            }
-            /* .question-group {
-                padding: 15px;
-            }
-            .question-group label {
-                font-size: 1em;
-            } */
-            .start-button {
-                padding: 12px 20px;
-                font-size: 1em;
-            }
+            .container { padding: 24px 16px; }
+            .child-banner { flex-direction: column; text-align: center; gap: 12px; }
+            .child-details { flex-direction: column; }
         }
     </style>
 </head>
 <body>
+
     <div class="container">
-        <h1>Hello {{ user_info.parent_name }} 👋</h1>
-        <h2>Let's begin the assessment. Your honest answers help us provide the best insights.</h2>
+        <div class="header">
+            <div class="header-badge">
+                <i class="fa-solid fa-clipboard-list"></i> Clinical Guidance & Overview
+            </div>
+            <h1>Screening Assessment Setup</h1>
+        </div>
 
-        <p class="child-info">
-            <strong>Child's Name:</strong> {{ user_info.child_name }}<br>
-            <strong>Age:</strong> {{ user_info.age }} months<br>
-            <strong>Gender:</strong> {{ user_info.gender | title }}
-        </p>
+        <div class="child-banner">
+            <div class="child-details">
+                <div class="avatar-circle"><i class="fa-solid fa-baby"></i></div>
+                <div class="child-meta">
+                    <h3>Assessing: {{ user_info.child_name }}</h3>
+                    <p>Age: {{ user_info.age }} Months | Gender: {{ user_info.gender | capitalize }}</p>
+                </div>
+            </div>
+            <div class="parent-meta">
+                <p><strong>Caregiver:</strong> {{ user_info.parent_name }}</p>
+            </div>
+        </div>
 
-        <h3>Questionnaire for Parents: Observing Your Toddler's Development & Family History</h3>
-        <p class="intro-text">
-            Please answer <strong>"Yes"</strong> or <strong>"No"</strong> to these questions about your child's everyday behavior.
-            <strong>If your child does something rarely or only once or twice, please answer "No" for that question.</strong>
-        </p>
-        <p class="intro-text">
-            These questions help us look for <strong>"Red Flags"</strong> – signs that might suggest a need for further assessment.
-            Our questions are based on guidelines from leading health organizations like the <strong>CDC</strong> and the <strong>American Academy of Pediatrics (AAP)</strong>.
-        </p>
-        <p class="intro-text">
-            <strong>Important to remember:</strong> This assessment is just a screening tool, not a diagnosis.
-            Finding a <strong>"red flag"</strong> doesn't automatically mean your child has autism.
-            But if we see several "red flags," it's a good idea to talk to a doctor or specialist for a closer look.
-        </p>
+        <div class="domain-grid">
+            <div class="domain-card">
+                <div class="domain-num">1</div>
+                <div class="domain-text">
+                    <h4>Social & Communication</h4>
+                    <p>Eye contact, name response, smiling, pointing.</p>
+                </div>
+            </div>
+            <div class="domain-card">
+                <div class="domain-num">2</div>
+                <div class="domain-text">
+                    <h4>Play & Imagination</h4>
+                    <p>Pretend play, toy usage, peer interaction.</p>
+                </div>
+            </div>
+            <div class="domain-card">
+                <div class="domain-num">3</div>
+                <div class="domain-text">
+                    <h4>Behavior & Sensory</h4>
+                    <p>Stimming, routines, noise sensitivity.</p>
+                </div>
+            </div>
+            <div class="domain-card">
+                <div class="domain-num">4</div>
+                <div class="domain-text">
+                    <h4>Development & Milestones</h4>
+                    <p>Skill retention, walking, sleep & feeding.</p>
+                </div>
+            </div>
+            <div class="domain-card">
+                <div class="domain-num">5</div>
+                <div class="domain-text">
+                    <h4>Family History</h4>
+                    <p>Genetics, neurodevelopmental history.</p>
+                </div>
+            </div>
+        </div>
 
-        <a href="{{ url_for('questionnaire_step_get', step_num=1) }}" class="start-button">Start Questionnaire</a>
+        <div class="guidelines-box">
+            <h4><i class="fa-solid fa-circle-info"></i> Important Instructions</h4>
+            <p>Answer based on your child's <strong>typical behavior</strong> over recent weeks. If a behavior is rare or only happened once, select <strong>"No"</strong>. Take your time for accurate results.</p>
+        </div>
+
+        <div class="btn-container">
+            <a href="/questionnaire-step/1" class="start-btn">
+                <span>Begin Step 1: Social Communication</span>
+                <i class="fa-solid fa-arrow-right"></i>
+            </a>
+        </div>
     </div>
+
 </body>
 </html>

@@ -3,157 +3,469 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>AutoDetect AI – Early Autism Detection</title>
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>AutoDetect AI – Early Pediatric ASD Screening & Assessment</title>
+    <!-- Modern Typography: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        body {
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #0d9488 50%, #0284c7 100%);
+            --card-bg: rgba(255, 255, 255, 0.94);
+            --card-border: rgba(255, 255, 255, 0.3);
+            --primary: #0d9488;
+            --primary-hover: #0f766e;
+            --secondary: #0284c7;
+            --accent: #f59e0b;
+            --dark-text: #0f172a;
+            --muted-text: #475569;
+            --light-bg: #f8fafc;
+            --shadow-lg: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
+            --radius-lg: 24px;
+            --radius-md: 14px;
+        }
+
+        * {
+            box-sizing: border-box;
             margin: 0;
-            font-family: 'Open Sans', sans-serif;
-            background: url('https://www.transparenttextures.com/patterns/paper-fibers.png') repeat, linear-gradient(to bottom right, #e6f5ff, #f3fcff);
-            background-blend-mode: overlay;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            color: var(--dark-text);
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-            color: #333;
+            padding: 30px 16px;
+            position: relative;
+            overflow-x: hidden;
         }
 
-        .container {
-            background-color: #ffffff;
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            max-width: 520px;
+        /* Decorative background elements */
+        body::before {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(13, 148, 136, 0.4) 0%, rgba(2, 132, 199, 0) 70%);
+            top: -100px;
+            left: -100px;
+            border-radius: 50%;
+            z-index: 0;
+            filter: blur(40px);
+        }
+
+        body::after {
+            content: '';
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(14, 165, 233, 0.3) 0%, rgba(15, 23, 42, 0) 70%);
+            bottom: -150px;
+            right: -150px;
+            border-radius: 50%;
+            z-index: 0;
+            filter: blur(50px);
+        }
+
+        .main-wrapper {
+            position: relative;
+            z-index: 10;
             width: 100%;
-            animation: fadeIn 1s ease-out;
+            max-width: 1080px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: center;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        /* Hero Left Column */
+        .hero-info {
+            color: #ffffff;
+            animation: slideInLeft 0.8s ease-out;
         }
 
-        h1 {
-            color: #2c3e50;
-            font-size: 2.6em;
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-
-        h2 {
-            font-size: 1em;
-            font-weight: 400;
-            color: #666;
-            margin-bottom: 30px;
-        }
-
-        p {
-            font-size: 1.05em;
-            margin-bottom: 25px;
-            color: #444;
-        }
-
-        form {
-            text-align: left;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 6px;
+        .brand-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            padding: 8px 18px;
+            border-radius: 50px;
+            font-size: 0.88rem;
             font-weight: 600;
-            color: #444;
+            color: #e0f2fe;
+            margin-bottom: 24px;
         }
 
-        input[type="text"],
-        input[type="number"],
-        input[type="email"], /* Added type for email */
-        select {
-            width: 100%;
-            padding: 12px;
+        .hero-title {
+            font-size: 3rem;
+            font-weight: 800;
+            line-height: 1.15;
             margin-bottom: 20px;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            font-size: 1em;
-            box-sizing: border-box;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            letter-spacing: -0.02em;
+            background: linear-gradient(to right, #ffffff, #93c5fd);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        input:focus,
-        select:focus {
-            border-color: #00aaff;
-            box-shadow: 0 0 5px rgba(0, 170, 255, 0.3);
-            outline: none;
+        .hero-desc {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #cbd5e1;
+            margin-bottom: 32px;
         }
 
-        input[type="submit"] {
-            background-color: #00b894;
-            color: white;
-            padding: 14px;
-            border: none;
+        .feature-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            padding: 16px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .feature-icon {
+            width: 36px;
+            height: 36px;
             border-radius: 10px;
-            font-size: 1.1em;
-            font-weight: 600;
-            cursor: pointer;
+            background: rgba(13, 148, 136, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #38bdf8;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .feature-text h4 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 4px;
+        }
+
+        .feature-text p {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            line-height: 1.4;
+        }
+
+        .trust-pills {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            font-size: 0.85rem;
+            color: #94a3b8;
+        }
+
+        .trust-pill {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .trust-pill i {
+            color: #34d399;
+        }
+
+        /* Form Card Right Column */
+        .form-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-lg);
+            padding: 40px;
+            box-shadow: var(--shadow-lg);
+            animation: slideInRight 0.8s ease-out;
+        }
+
+        .form-header {
+            margin-bottom: 28px;
+            text-align: center;
+        }
+
+        .form-header h2 {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--dark-text);
+            margin-bottom: 8px;
+        }
+
+        .form-header p {
+            font-size: 0.95rem;
+            color: var(--muted-text);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--dark-text);
+            margin-bottom: 8px;
+        }
+
+        .input-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .input-field {
+            position: relative;
+        }
+
+        .input-field i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 1rem;
+            transition: color 0.3s ease;
+        }
+
+        .input-field input,
+        .input-field select {
             width: 100%;
-            transition: background-color 0.3s ease, transform 0.2s ease;
+            padding: 13px 14px 13px 42px;
+            background: var(--light-bg);
+            border: 1.5px solid #e2e8f0;
+            border-radius: var(--radius-md);
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--dark-text);
+            font-family: inherit;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        input[type="submit"]:hover {
-            background-color: #009f7a;
-            transform: scale(1.02);
+        .input-field input:focus,
+        .input-field select:focus {
+            outline: none;
+            background: #ffffff;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.15);
         }
 
-        input[type="submit"]:active {
-            transform: scale(1);
+        .input-field input:focus + i,
+        .input-field select:focus + i {
+            color: var(--primary);
         }
 
-        @media (max-width: 600px) {
-            .container {
-                padding: 30px 20px;
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border: none;
+            border-radius: var(--radius-md);
+            color: #ffffff;
+            font-size: 1.05rem;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 10px 20px -5px rgba(13, 148, 136, 0.4);
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 25px -5px rgba(13, 148, 136, 0.5);
+            background: linear-gradient(135deg, #0f766e 0%, #0369a1 100%);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .privacy-note {
+            margin-top: 18px;
+            font-size: 0.8rem;
+            color: #64748b;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* Responsive Layout */
+        @media (max-width: 900px) {
+            .main-wrapper {
+                grid-template-columns: 1fr;
+                gap: 30px;
             }
 
-            h1 {
-                font-size: 2em;
+            .hero-title {
+                font-size: 2.3rem;
             }
 
-            h2 {
-                font-size: 0.95em;
+            .form-card {
+                padding: 28px 20px;
             }
 
-            p {
-                font-size: 1em;
+            .feature-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>AutoDetect AI</h1>
-        <h2>AI-Powered Early Screening for Toddler Autism,<br> with Clear and Trustworthy Insights</h2>
-        <p>Let’s begin with a few quick details about your little one and yourself.</p> <form method="POST" action="/start-questionnaire">            <label for="child_name">👶 Child's Name</label>
-            <input type="text" id="child_name" name="child_name" required />
 
-            <label for="child_age">📅 Age in Months</label>
-            <input type="number" id="child_age" name="child_age" min="12" max="36" required />
+    <div class="main-wrapper">
+        <!-- Hero Information Side -->
+        <div class="hero-info">
+            <div class="brand-badge">
+                <i class="fa-solid fa-brain-circuit"></i> Pediatric Neuro-AI Platform
+            </div>
+            
+            <h1 class="hero-title">AutoDetect AI</h1>
+            <p class="hero-desc">
+                An intelligent multi-modal screening system combining <strong>clinical questionnaire red flags</strong> and <strong>deep-learning video stimming detection</strong> to enable early intervention for toddlers aged 12–36 months.
+            </p>
 
-            <label for="gender">⚧️ Gender</label>
-            <select id="gender" name="gender" required>
-                <option value="">-- Select --</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="other">Other</option>
-            </select>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fa-solid fa-clipboard-check"></i></div>
+                    <div class="feature-text">
+                        <h4>M-CHAT-R/F Standard</h4>
+                        <p>5 domain clinical screening across 20+ behavioral indicators.</p>
+                    </div>
+                </div>
 
-            <label for="parent_name">👨‍👩‍👧 Parent's Name</label>
-            <input type="text" id="parent_name" name="parent_name" required />
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fa-solid fa-video"></i></div>
+                    <div class="feature-text">
+                        <h4>Spatio-Temporal AI</h4>
+                        <p>MobileNetV2 + LSTM neural network for motor stimming detection.</p>
+                    </div>
+                </div>
 
-            <label for="parent_email">📧 Parent's Email</label>
-            <input type="email" id="parent_email" name="parent_email" required />
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fa-solid fa-eye"></i></div>
+                    <div class="feature-text">
+                        <h4>Explainable AI (XAI)</h4>
+                        <p>Grad-CAM heatmaps highlight key visual indicators.</p>
+                    </div>
+                </div>
 
-            <input type="submit" value="🎯 Start Assessment" />
-        </form>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fa-solid fa-file-medical"></i></div>
+                    <div class="feature-text">
+                        <h4>Clinical PDF Report</h4>
+                        <p>Instant detailed summary delivered to your inbox.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="trust-pills">
+                <div class="trust-pill"><i class="fa-solid fa-shield-halved"></i> Privacy First</div>
+                <div class="trust-pill"><i class="fa-solid fa-user-doctor"></i> Specialist Backed</div>
+                <div class="trust-pill"><i class="fa-solid fa-bolt"></i> Real-time AI</div>
+            </div>
+        </div>
+
+        <!-- Intake Form Card -->
+        <div class="form-card">
+            <div class="form-header">
+                <h2>Start Assessment</h2>
+                <p>Provide basic details to personalize the screening session.</p>
+            </div>
+
+            <form method="POST" action="/start-questionnaire">
+                <div class="input-group">
+                    <label for="child_name">👶 Child's Full Name</label>
+                    <div class="input-field">
+                        <i class="fa-solid fa-child"></i>
+                        <input type="text" id="child_name" name="child_name" placeholder="e.g., Leo Smith" required />
+                    </div>
+                </div>
+
+                <div class="input-row">
+                    <div class="input-group">
+                        <label for="child_age">📅 Age (12-36 Months)</label>
+                        <div class="input-field">
+                            <i class="fa-solid fa-calendar-days"></i>
+                            <input type="number" id="child_age" name="child_age" min="12" max="36" placeholder="24" required />
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="gender">⚧️ Gender</label>
+                        <div class="input-field">
+                            <i class="fa-solid fa-venus-mars"></i>
+                            <select id="gender" name="gender" required>
+                                <option value="">Select</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="parent_name">👨‍👩‍👧 Caregiver / Parent Name</label>
+                    <div class="input-field">
+                        <i class="fa-solid fa-user"></i>
+                        <input type="text" id="parent_name" name="parent_name" placeholder="e.g., Sarah Smith" required />
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="parent_email">📧 Caregiver Email (For Clinical Report)</label>
+                    <div class="input-field">
+                        <i class="fa-solid fa-envelope"></i>
+                        <input type="email" id="parent_email" name="parent_email" placeholder="sarah@example.com" required />
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    <span>Begin Questionnaire</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+
+                <div class="privacy-note">
+                    <i class="fa-solid fa-lock"></i> All clinical responses are encrypted & kept strictly confidential.
+                </div>
+            </form>
+        </div>
     </div>
+
 </body>
 </html>

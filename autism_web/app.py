@@ -14,20 +14,25 @@ import numpy as np
 from torchvision.models import MobileNet_V2_Weights
 
 
+import gc
+
 app = Flask(__name__)
-app.config['SESSION_TYPE'] = 'filesystem'  # or 'redis' if you prefer Redis
-app.config['SESSION_FILE_DIR'] = './flask_session_data'  # Directory to store session files
-app.config['SESSION_PERMANENT'] = False  # Optional: Makes session non-permanent
+SESSION_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'flask_session_data')
+os.makedirs(SESSION_DIR, exist_ok=True)
+
+app.config['SESSION_TYPE'] = 'filesystem'
+app.config['SESSION_FILE_DIR'] = SESSION_DIR
+app.config['SESSION_PERMANENT'] = False
 Session(app)
-# Generate a strong secret key for session management
-app.secret_key = secrets.token_hex(16)
+app.secret_key = os.environ.get('SECRET_KEY', secrets.token_hex(16))
 
 # --- Email Configuration ---
-app.config['MAIL_SERVER'] = 'smtp.gmail.com'  # Or another SMTP server
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME', 'guptaanchal0321@gmail.com')     # Your email
-app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD', '')         # Set via environment variable (e.g., Gmail App Password)
+app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
+app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', 587))
+app.config['MAIL_USE_TLS'] = os.environ.get('MAIL_USE_TLS', 'True').lower() == 'true'
+app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME', 'guptaanchal0321@gmail.com')
+app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD', '')
+mail = Mail(app)
 mail = Mail(app)
 
 # --- Configuration for Video Upload ---
@@ -69,7 +74,9 @@ class CNNLSTM(nn.Module):
         return torch.sigmoid(out).view(-1)
 
 model = CNNLSTM()
-model.load_state_dict(torch.load("final_code/best_stimming_detector_model_mobilenetv2.pth", map_location=torch.device('cpu')))
+MODEL_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "final_code", "best_stimming_detector_model_mobilenetv2.pth")
+if os.path.exists(MODEL_PATH):
+    model.load_state_dict(torch.load(MODEL_PATH, map_location=torch.device('cpu')))
 model.eval()
 
 
@@ -302,6 +309,9 @@ def analyze_video(video_path):
 
     label = "ASD" if probability >= 0.4 else "Non-ASD"
     print(f"Predicted probability: {probability}")
+
+    del frames, frames_tensor, input_tensor
+    gc.collect()
 
     return {
         "probability": round(probability * 10, 2),
@@ -667,4 +677,6 @@ def thank_you_page():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    debug = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
+    app.run(host='0.0.0.0', port=port, debug=debug)

@@ -3,175 +3,174 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AutoDetect AI – Thank You & Next Steps</title>
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>AutoDetect AI – Assessment Session Complete</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #0d9488 50%, #0284c7 100%);
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --primary: #0d9488;
+            --secondary: #0284c7;
+            --dark-text: #0f172a;
+            --muted-text: #475569;
+            --shadow-lg: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
+            --radius-lg: 24px;
+            --radius-md: 14px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            font-family: 'Open Sans', sans-serif;
-            margin: 0;
-            padding: 20px;
-            background: url('https://www.transparenttextures.com/patterns/paper-fibers.png') repeat, linear-gradient(to bottom right, #e6f5ff, #f3fcff);
-            background-blend-mode: overlay;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            color: var(--dark-text);
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            color: #333;
+            padding: 30px 16px;
         }
+
         .container {
-            max-width: 800px;
-            margin: auto;
-            background: #fff;
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.1);
-            text-align: center;
+            max-width: 760px;
             width: 100%;
-            animation: fadeIn 1s ease-out;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-lg);
+            padding: 44px;
+            box-shadow: var(--shadow-lg);
+            text-align: center;
+            animation: fadeIn 0.5s ease-out;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
+            from { opacity: 0; transform: translateY(15px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        h1 {
-            color: #2c3e50;
-            font-size: 2.8em;
-            margin-bottom: 20px;
-            font-weight: 700;
-        }
-        h2 {
-            color: #34495e;
-            font-size: 1.6em;
-            margin-top: 30px;
-            margin-bottom: 20px;
-        }
-        p {
-            font-size: 1.1em;
-            color: #555;
-            line-height: 1.6;
-            margin-bottom: 25px;
-        }
-        .thank-you-icon {
-            font-size: 4em;
-            color: #00b894;
-            margin-bottom: 30px;
+        .heart-icon {
+            width: 80px; height: 80px;
+            background: #e0f2fe;
+            color: var(--secondary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            margin: 0 auto 20px auto;
         }
 
-        .support-links {
-            margin-top: 40px;
-            border-top: 1px solid #eee;
-            padding-top: 30px;
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--dark-text);
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: 1rem;
+            color: var(--muted-text);
+            line-height: 1.6;
+            margin-bottom: 32px;
+        }
+
+        .resources-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: var(--radius-md);
+            padding: 24px;
             text-align: left;
+            margin-bottom: 32px;
         }
-        .support-links h3 {
-            color: #2c3e50;
-            font-size: 1.4em;
-            margin-bottom: 20px;
+
+        .resources-box h3 {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--dark-text);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-        .support-links ul {
+
+        .resources-box ul {
             list-style: none;
-            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
-        .support-links li {
-            margin-bottom: 15px;
-            font-size: 1em;
-        }
-        .support-links a {
-            color: #007bff;
+
+        .resources-box li a {
+            color: var(--secondary);
+            font-weight: 700;
             text-decoration: none;
-            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.92rem;
             transition: color 0.2s ease;
         }
-        .support-links a:hover {
-            color: #0056b3;
-            text-decoration: underline;
+
+        .resources-box li a:hover {
+            color: var(--primary);
         }
 
-        .button-group {
-            margin-top: 40px;
-        }
-
-        .button {
-            display: inline-block;
-            background-color: #007bff;
+        .btn-home {
+            padding: 16px 36px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             color: white;
-            padding: 15px 30px;
-            border: none;
-            border-radius: 10px;
-            font-size: 1.1em;
-            font-weight: 600;
-            cursor: pointer;
             text-decoration: none;
-            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
-            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
-        }
-        .button:hover {
-            background-color: #0056b3;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(0, 123, 255, 0.3);
-        }
-        .button:active {
-            transform: translateY(0);
-            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            font-size: 1.05rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 10px 20px -5px rgba(13, 148, 136, 0.4);
+            transition: all 0.25s ease;
         }
 
-        /* Responsive adjustments */
-        @media (max-width: 600px) {
-            .container {
-                padding: 30px 20px;
-            }
-            h1 {
-                font-size: 2.2em;
-            }
-            h2 {
-                font-size: 1.3em;
-            }
-            p, .support-links li {
-                font-size: 0.95em;
-            }
-            .button {
-                padding: 12px 20px;
-                font-size: 1em;
-            }
+        .btn-home:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 25px -5px rgba(13, 148, 136, 0.5);
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="thank-you-icon">🎉</div>
-        <h1>Thank You for Completing the Assessment!</h1>
-        <p>Your comprehensive assessment for **{{ child_name }}** is now complete. We truly appreciate your time and dedication to your child's developmental journey.</p>
-        <p>Our team will process the submitted information and video (if provided) to refine our insights, and we will contact you via email at **{{ parent_email }}** with any further information or recommendations.</p>
 
-        <div class="support-links">
-            <h2>What Happens Next?</h2>
-            <p>While awaiting any further communication from AutoDetect AI, here are some general resources that may be helpful:</p>
+    <div class="container">
+        <div class="heart-icon">
+            <i class="fa-solid fa-heart-pulse"></i>
+        </div>
+
+        <h1>Thank You, {{ parent_name }}!</h1>
+        <p>The screening session for <strong>{{ child_name }}</strong> is complete. A detailed summary report has been dispatched to <strong>{{ parent_email }}</strong>.</p>
+
+        <div class="resources-box">
+            <h3><i class="fa-solid fa-book-medical"></i> Clinical Resources & Guidance</h3>
             <ul>
                 <li>
-                    <strong>Consult a Professional:</strong> Regardless of the assessment outcome, if you have any concerns, always speak with your child's pediatrician or a developmental specialist.
+                    <a href="https://www.autismspeaks.org/m-chat" target="_blank" rel="noopener">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i> CDC & M-CHAT Early Autism Screening Guidelines
+                    </a>
                 </li>
                 <li>
-                    <strong>Early Intervention Services:</strong> Learn about early intervention programs available in your region, which can provide support for young children with developmental delays.
-                </li>
-                <li>
-                    <strong>Reliable Information:</strong>
-                    <ul>
-                        <li><a href="https://www.cdc.gov/ncbddd/autism/index.html" target="_blank">CDC's Autism Spectrum Disorder Information</a></li>
-                        <li><a href="https://www.autismspeaks.org/" target="_blank">Autism Speaks</a> (global organization, provides resources)</li>
-                        <li><a href="https://www.aap.org/" target="_blank">American Academy of Pediatrics (AAP)</a> - Healthychildren.org section on development.</li>
-                    </ul>
-                </li>
-                <li>
-                    <strong>Support Groups:</strong> Connecting with other parents can provide invaluable emotional support and practical advice.
+                    <a href="https://www.aap.org/" target="_blank" rel="noopener">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i> American Academy of Pediatrics (AAP) Milestones & Resources
+                    </a>
                 </li>
             </ul>
         </div>
 
-        <div class="button-group">
-            <a href="{{ url_for('home') }}" class="button">Start a New Assessment</a>
-        </div>
+        <a href="/" class="btn-home">
+            <i class="fa-solid fa-house"></i>
+            <span>Start a New Assessment Session</span>
+        </a>
     </div>
+
 </body>
 </html>

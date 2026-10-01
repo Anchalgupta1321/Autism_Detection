@@ -3,143 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AutoDetect AI – Video Upload Confirmed</title>
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>AutoDetect AI – Video Analysis Complete</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #0d9488 50%, #0284c7 100%);
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --primary: #0d9488;
+            --secondary: #0284c7;
+            --dark-text: #0f172a;
+            --muted-text: #475569;
+            --shadow-lg: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
+            --radius-lg: 24px;
+            --radius-md: 14px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            font-family: 'Open Sans', sans-serif;
-            margin: 0;
-            padding: 20px;
-            background: url('https://www.transparenttextures.com/patterns/paper-fibers.png') repeat, linear-gradient(to bottom right, #e6f5ff, #f3fcff);
-            background-blend-mode: overlay;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            color: var(--dark-text);
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            color: #333;
+            padding: 30px 16px;
         }
+
         .container {
-            max-width: 700px;
-            margin: auto;
-            background: #fff;
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.1);
-            text-align: center;
+            max-width: 720px;
             width: 100%;
-            animation: fadeIn 1s ease-out;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-lg);
+            padding: 40px;
+            box-shadow: var(--shadow-lg);
+            text-align: center;
+            animation: fadeIn 0.5s ease-out;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
+            from { opacity: 0; transform: translateY(15px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: #dcfce7;
+            color: #16a34a;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            margin: 0 auto 20px auto;
+        }
+
         h1 {
-            color: #2c3e50;
-            font-size: 2.5em;
-            margin-bottom: 20px;
-            font-weight: 700;
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--dark-text);
+            margin-bottom: 10px;
         }
+
         p {
-            font-size: 1.1em;
-            color: #555;
+            font-size: 0.98rem;
+            color: var(--muted-text);
             line-height: 1.6;
-            margin-bottom: 25px;
-        }
-        .confirmation-message {
-            background-color: #d4edda; /* Green for success */
-            border: 1px solid #28a745;
-            color: #155724;
-            padding: 25px;
-            border-radius: 15px;
-            margin-top: 30px;
-            margin-bottom: 40px;
-            font-size: 1.2em;
-            font-weight: 600;
-        }
-        .disclaimer {
-            background-color: #fff3e0;
-            border: 1px solid #ffcc80;
-            padding: 25px;
-            border-radius: 15px;
-            text-align: left;
-            font-size: 0.95em;
-            color: #e65100;
-            line-height: 1.6;
-            margin-bottom: 30px;
-        }
-        .disclaimer h3 {
-            color: #e65100;
-            margin-top: 0;
-            margin-bottom: 15px;
-            font-size: 1.4em;
+            margin-bottom: 28px;
         }
 
-        .button {
-            display: inline-block;
-            background-color: #007bff;
+        .msg-box {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: var(--radius-md);
+            padding: 20px;
+            font-weight: 700;
+            color: #15803d;
+            margin-bottom: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-view {
+            padding: 16px 36px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             color: white;
-            padding: 15px 30px;
-            border: none;
-            border-radius: 10px;
-            font-size: 1.1em;
-            font-weight: 600;
-            cursor: pointer;
             text-decoration: none;
-            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
-            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
-            margin-top: 20px;
-        }
-        .button:hover {
-            background-color: #0056b3;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(0, 123, 255, 0.3);
-        }
-        .button:active {
-            transform: translateY(0);
-            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            font-size: 1.05rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 10px 20px -5px rgba(13, 148, 136, 0.4);
+            transition: all 0.25s ease;
         }
 
-        /* Responsive adjustments */
-        @media (max-width: 600px) {
-            .container {
-                padding: 30px 20px;
-            }
-            h1 {
-                font-size: 2em;
-            }
-            .confirmation-message {
-                font-size: 1em;
-            }
+        .btn-view:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 25px -5px rgba(13, 148, 136, 0.5);
         }
     </style>
 </head>
 <body>
+
     <div class="container">
-        <h1>Video Upload Confirmation</h1>
-        <p>Hello {{ parent_name }},</p>
-
-        <div class="confirmation-message">
-            <p><strong>Your video for {{ child_name }} has been uploaded successfully!</strong></p>
-            <p>We will now process this video for further assessment.</p>
+        <div class="success-icon">
+            <i class="fa-solid fa-check"></i>
         </div>
 
-        <div class="disclaimer">
-            <h3>Next Steps:</h3>
-            <p>
-                Our AI system will analyze the video data in conjunction with the questionnaire responses. This process may take some time.
-                We will notify you via email at **{{ parent_email }}** once the video analysis is complete and refined insights are available.
-            </p>
-            <p>
-                As a reminder, this assessment is a screening tool, not a diagnostic one. Any insights provided are for informational purposes and should not replace professional medical advice.
-            </p>
-        </div>
+        <h1>Video Neural Analysis Complete!</h1>
+        <p>Thank you, <strong>{{ parent_name }}</strong>. The video for <strong>{{ child_name }}</strong> has been successfully processed by our MobileNetV2 + LSTM model.</p>
 
-        <a href="{{ url_for('home') }}" class="button">Start New Assessment</a>
-	<a href="{{ url_for('show_combined_results') }}" class="button" style="background-color: #28a745; margin-left: 10px;">
-	    View Final Results
-	</a>
+        {% if upload_message %}
+        <div class="msg-box">
+            <i class="fa-solid fa-circle-check"></i> {{ upload_message }}
+        </div>
+        {% endif %}
+
+        <a href="/combined-results" class="btn-view">
+            <span>View Comprehensive Multi-Modal Diagnostic Report</span>
+            <i class="fa-solid fa-arrow-right"></i>
+        </a>
     </div>
+
 </body>
 </html>

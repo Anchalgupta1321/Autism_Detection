@@ -3,226 +3,405 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AutoDetect AI – Video Assessment</title>
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>AutoDetect AI – AI Video Behavioral Stimming Analysis</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #0d9488 50%, #0284c7 100%);
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --primary: #0d9488;
+            --secondary: #0284c7;
+            --dark-text: #0f172a;
+            --muted-text: #475569;
+            --shadow-lg: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
+            --radius-lg: 24px;
+            --radius-md: 14px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            font-family: 'Open Sans', sans-serif;
-            margin: 0;
-            padding: 20px;
-            background: url('https://www.transparenttextures.com/patterns/paper-fibers.png') repeat, linear-gradient(to bottom right, #e6f5ff, #f3fcff);
-            background-blend-mode: overlay;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            color: var(--dark-text);
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            color: #333;
+            padding: 30px 16px;
         }
+
         .container {
-            max-width: 700px;
-            margin: auto;
-            background: #fff;
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.1);
-            text-align: center;
+            max-width: 800px;
             width: 100%;
-            animation: fadeIn 1s ease-out;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-lg);
+            padding: 40px;
+            box-shadow: var(--shadow-lg);
+            animation: fadeIn 0.5s ease-out;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
+            from { opacity: 0; transform: translateY(15px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        h1 {
-            color: #2c3e50;
-            font-size: 2.5em;
-            margin-bottom: 20px;
+        .header { text-align: center; margin-bottom: 28px; }
+
+        .header-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(13, 148, 136, 0.1);
+            color: var(--primary);
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-size: 0.85rem;
             font-weight: 700;
-        }
-        p {
-            font-size: 1.05em;
-            color: #555;
-            margin-bottom: 25px;
-            line-height: 1.6;
-        }
-        .warning-message {
-            color: #d32f2f;
-            background-color: #ffe0e0;
-            border: 1px solid #ef9a9a;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-weight: 600;
+            margin-bottom: 12px;
         }
 
-        form {
-            text-align: left;
-            margin-top: 30px;
+        .header h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--dark-text);
+            margin-bottom: 8px;
         }
 
-        label {
-            display: block;
-            margin-bottom: 10px;
-            font-weight: 600;
-            color: #444;
-            font-size: 1.1em;
+        .header p {
+            font-size: 0.95rem;
+            color: var(--muted-text);
+            max-width: 600px;
+            margin: 0 auto;
         }
 
-        input[type="file"] {
+        /* Drag & Drop Box */
+        .dropzone {
+            border: 2px dashed #cbd5e1;
+            border-radius: var(--radius-md);
+            padding: 40px 20px;
+            text-align: center;
+            background: #f8fafc;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            margin-bottom: 24px;
+        }
+
+        .dropzone:hover, .dropzone.dragover {
+            border-color: var(--primary);
+            background: rgba(13, 148, 136, 0.05);
+        }
+
+        .dropzone i {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 14px;
+        }
+
+        .dropzone h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--dark-text);
+            margin-bottom: 6px;
+        }
+
+        .dropzone p {
+            font-size: 0.85rem;
+            color: var(--muted-text);
+        }
+
+        .file-input {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        /* Video Preview Area */
+        .preview-container {
+            display: none;
+            margin-bottom: 24px;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            background: #0f172a;
+        }
+
+        video {
             width: 100%;
-            padding: 12px;
-            margin-bottom: 20px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            font-size: 1em;
-            box-sizing: border-box;
-            background-color: #f8f8f8;
-            cursor: pointer;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
-        }
-        input[type="file"]:hover {
-            border-color: #00aaff;
-        }
-        input[type="file"]:focus {
-            border-color: #00aaff;
-            box-shadow: 0 0 5px rgba(0, 170, 255, 0.3);
-            outline: none;
+            max-height: 360px;
+            display: block;
         }
 
-        .button {
-            display: block; /* Make button full width */
-            background-color: #28a745; /* Green upload button */
-            color: white;
-            padding: 15px 30px;
-            border: none;
-            border-radius: 10px;
-            font-size: 1.1em;
+        .file-info-badge {
+            background: #e0f2fe;
+            border: 1px solid #bae6fd;
+            padding: 12px 18px;
+            border-radius: 12px;
+            font-size: 0.9rem;
             font-weight: 600;
-            cursor: pointer;
+            color: #0369a1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        /* Guidelines */
+        .guidelines {
+            background: #f1f5f9;
+            border-radius: var(--radius-md);
+            padding: 20px;
+            margin-bottom: 32px;
+        }
+
+        .guidelines h4 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--dark-text);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .guidelines ul {
+            list-style: none;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .guidelines li {
+            font-size: 0.85rem;
+            color: var(--muted-text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .guidelines li i { color: #10b981; }
+
+        /* Actions */
+        .action-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .btn-secondary {
+            padding: 14px 28px;
+            background: #f1f5f9;
+            color: var(--muted-text);
             text-decoration: none;
-            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
-            box-shadow: 0 4px 10px rgba(0, 184, 148, 0.2);
-            margin-top: 30px;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
         }
-        .button:hover {
-            background-color: #218838;
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+            color: var(--dark-text);
+        }
+
+        .btn-upload {
+            padding: 16px 36px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            font-size: 1.05rem;
+            font-family: inherit;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 10px 20px -5px rgba(13, 148, 136, 0.4);
+            transition: all 0.25s ease;
+        }
+
+        .btn-upload:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(0, 184, 148, 0.3);
-        }
-        .button:active {
-            transform: translateY(0);
-            box-shadow: 0 4px 10px rgba(0, 184, 148, 0.2);
+            box-shadow: 0 15px 25px -5px rgba(13, 148, 136, 0.5);
         }
 
-        .back-button {
-            background-color: #6c757d; /* Grey button */
-            margin-top: 20px;
-        }
-        .back-button:hover {
-            background-color: #5a6268;
+        .btn-upload:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
         }
 
-        /* Responsive adjustments */
+        /* Processing Modal overlay */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(255,255,255,0.2);
+            border-top: 5px solid #38bdf8;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         @media (max-width: 600px) {
-            .container {
-                padding: 30px 20px;
-            }
-            h1 {
-                font-size: 2em;
-            }
-            p {
-                font-size: 0.95em;
-            }
-            .button {
-                padding: 12px 20px;
-                font-size: 1em;
-            }
+            .container { padding: 24px 16px; }
+            .guidelines ul { grid-template-columns: 1fr; }
+            .action-row { flex-direction: column-reverse; }
+            .btn-upload, .btn-secondary { width: 100%; justify-content: center; }
         }
     </style>
 </head>
 <body>
+
     <div class="container">
-        <h1>Video Assessment for {{ child_name }}</h1>
-        <p>
-            To provide a more comprehensive insight, please upload a short video of your child. This helps us observe interactions and behaviors that might not be captured in the questionnaire.
-        </p>
-        <p>
-            Please ensure the video is **1 minute maximum** and clearly shows your child in a natural setting (e.g., playing, interacting).
-        </p>
-        <p class="warning-message" id="uploadMessage" style="display:none;">
-            {{ upload_message | default('') }}
-        </p>
+        <div class="header">
+            <div class="header-badge">
+                <i class="fa-solid fa-microchip"></i> Spatio-Temporal Deep Learning
+            </div>
+            <h1>AI Video Behavior Analysis</h1>
+            <p>Upload a short video clip of <strong>{{ child_name }}</strong> engaging in play or movement activities for automated stimming detection.</p>
+        </div>
 
-        <form method="POST" action="/upload-video" enctype="multipart/form-data" onsubmit="return validateVideoForm()">
-            {% for key, value in request.form.items() %}
-                <input type="hidden" name="{{ key }}" value="{{ value }}">
-            {% endfor %}
+        {% if upload_message %}
+        <div style="background: #ffe4e6; border: 1px solid #fecdd3; color: #e11d48; padding: 12px 18px; border-radius: 12px; margin-bottom: 20px; font-weight: 600; font-size: 0.9rem;">
+            <i class="fa-solid fa-circle-exclamation"></i> {{ upload_message }}
+        </div>
+        {% endif %}
 
-            <label for="video_file">Select Video File:</label>
-            <input type="file" id="video_file" name="video_file" accept="video/mp4,video/avi,video/mov,video/mkv" required>
-            
-            <button type="submit" class="button">Upload Video</button>
-            <a href="{{ url_for('submit_assessment') }}" class="button back-button">No Thanks, Return to Results</a>
+        <form id="upload-form" action="/upload-video" method="POST" enctype="multipart/form-data">
+            <div class="dropzone" id="dropzone">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+                <h3>Drag & Drop Video File Here</h3>
+                <p>Supports MP4, AVI, MOV, MKV (Up to 50 MB)</p>
+                <input type="file" name="video_file" id="video_file" class="file-input" accept=".mp4,.avi,.mov,.mkv" required>
+            </div>
+
+            <div class="preview-container" id="preview-container">
+                <video id="video-preview" controls></video>
+            </div>
+
+            <div class="file-info-badge" id="file-info" style="display: none;">
+                <div><i class="fa-solid fa-file-video"></i> <span id="file-name">filename.mp4</span></div>
+                <span id="file-size">0 MB</span>
+            </div>
+
+            <div class="guidelines">
+                <h4><i class="fa-solid fa-lightbulb"></i> Video Recording Tips</h4>
+                <ul>
+                    <li><i class="fa-solid fa-circle-check"></i> 10 to 30 seconds length</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Good lighting & clear focus</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Capture body/arm movements</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Natural play environment</li>
+                </ul>
+            </div>
+
+            <div class="action-row">
+                <a href="/results" class="btn-secondary">
+                    <i class="fa-solid fa-arrow-left"></i> Back to Questionnaire
+                </a>
+
+                <button type="submit" class="btn-upload" id="submit-btn">
+                    <i class="fa-solid fa-brain"></i>
+                    <span>Analyze Video with AI</span>
+                </button>
+            </div>
         </form>
     </div>
 
+    <!-- Processing Overlay -->
+    <div class="overlay" id="processing-overlay">
+        <div class="spinner"></div>
+        <h2 style="font-size: 1.6rem; font-weight: 800; margin-bottom: 8px;">Analyzing Behavioral Video...</h2>
+        <p style="font-size: 0.95rem; color: #cbd5e1; max-width: 480px;" id="status-step">Uniformly sampling 16 keyframes for MobileNetV2 spatial feature extraction...</p>
+    </div>
+
     <script>
-        const MAX_FILE_SIZE_BYTES = 100 * 1024 * 1024; // 100 MB, matches Flask config
-        const ALLOWED_EXTENSIONS_JS = ['.mp4', '.avi', '.mov', '.mkv'];
+        const fileInput = document.getElementById('video_file');
+        const dropzone = document.getElementById('dropzone');
+        const previewContainer = document.getElementById('preview-container');
+        const videoPreview = document.getElementById('video-preview');
+        const fileInfo = document.getElementById('file-info');
+        const fileName = document.getElementById('file-name');
+        const fileSize = document.getElementById('file-size');
+        const uploadForm = document.getElementById('upload-form');
+        const overlay = document.getElementById('processing-overlay');
+        const statusStep = document.getElementById('status-step');
 
-        function validateVideoForm() {
-            const fileInput = document.getElementById('video_file');
+        fileInput.addEventListener('change', handleFileSelect);
+
+        function handleFileSelect(e) {
             const file = fileInput.files[0];
-            const uploadMessageDiv = document.getElementById('uploadMessage');
-            uploadMessageDiv.style.display = 'none'; // Hide previous messages
+            if (file) {
+                fileName.textContent = file.name;
+                fileSize.textContent = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+                fileInfo.style.display = 'flex';
 
-            if (!file) {
-                uploadMessageDiv.textContent = "Please select a file to upload.";
-                uploadMessageDiv.style.display = 'block';
-                return false;
+                const url = URL.createObjectURL(file);
+                videoPreview.src = url;
+                previewContainer.style.display = 'block';
             }
-
-            // Check file type
-            const fileName = file.name.toLowerCase();
-            const fileExtension = '.' + fileName.split('.').pop();
-            if (!ALLOWED_EXTENSIONS_JS.includes(fileExtension)) {
-                uploadMessageDiv.textContent = "Invalid file type. Please upload MP4, AVI, MOV, or MKV.";
-                uploadMessageDiv.style.display = 'block';
-                return false;
-            }
-
-            // Check file size
-            if (file.size > MAX_FILE_SIZE_BYTES) {
-                uploadMessageDiv.textContent = `File is too large. Max size is ${MAX_FILE_SIZE_BYTES / (1024 * 1024)} MB.`;
-                uploadMessageDiv.style.display = 'block';
-                return false;
-            }
-
-            // Note: Validating video duration (1 minute max) precisely on client-side
-            // requires reading the video metadata, which is complex and not reliably cross-browser.
-            // Server-side validation after upload is more robust for duration.
-            // You might add a warning here for the user to keep video short.
-
-            return true; // Allow form submission
         }
 
-        // Display messages passed from Flask after upload attempt
-        window.onload = function() {
-            const uploadMessageText = "{{ upload_message | default('') }}";
-            const uploadMessageDiv = document.getElementById('uploadMessage');
-            if (uploadMessageText) {
-                uploadMessageDiv.textContent = uploadMessageText;
-                uploadMessageDiv.style.display = 'block';
-                // Adjust color for success messages
-                if (uploadMessageText.includes("successfully")) {
-                    uploadMessageDiv.style.backgroundColor = '#d4edda';
-                    uploadMessageDiv.style.borderColor = '#28a745';
-                    uploadMessageDiv.style.color = '#155724';
+        // Drag & Drop visual feedback
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropzone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                dropzone.classList.add('dragover');
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                dropzone.classList.remove('dragover');
+            }, false);
+        });
+
+        uploadForm.addEventListener('submit', function() {
+            overlay.style.display = 'flex';
+            const steps = [
+                "Uniformly sampling 16 keyframes from video tensor...",
+                "Running MobileNetV2 spatial feature extraction (1280-dim)...",
+                "Evaluating temporal sequence across frames with LSTM...",
+                "Computing Grad-CAM explainability heatmaps..."
+            ];
+            let idx = 0;
+            setInterval(() => {
+                if (idx < steps.length) {
+                    statusStep.textContent = steps[idx];
+                    idx++;
                 }
-            }
-        };
+            }, 1800);
+        });
     </script>
 </body>
 </html>
