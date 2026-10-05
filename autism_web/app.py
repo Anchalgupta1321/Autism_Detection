@@ -609,13 +609,29 @@ def generate_pdf_report_bytes(user_info, final_prediction, questionnaire_risk_ca
 
 
 def send_report_email(to_email, subject, report_html, pdf_bytes=None, pdf_filename="ASD_Assessment_Report.pdf"):
-    msg = Message(subject,
-                  sender=app.config['MAIL_USERNAME'],
-                  recipients=[to_email])
-    msg.html = report_html  # Email supports rich formatting
-    if pdf_bytes:
-        msg.attach(pdf_filename, "application/pdf", pdf_bytes)
-    mail.send(msg)
+    if not app.config.get('MAIL_PASSWORD'):
+        app.logger.info("Skipping SMTP email send as MAIL_PASSWORD environment variable is empty.")
+        return
+
+    try:
+        msg = Message(subject,
+                      sender=app.config['MAIL_USERNAME'],
+                      recipients=[to_email])
+        msg.html = report_html
+        if pdf_bytes:
+            msg.attach(pdf_filename, "application/pdf", pdf_bytes)
+        
+        import threading
+        def _async_send(app_obj, message):
+            with app_obj.app_context():
+                try:
+                    mail.send(message)
+                except Exception as e:
+                    app_obj.logger.warning(f"Async email error: {e}")
+
+        threading.Thread(target=_async_send, args=(app._get_current_object(), msg)).start()
+    except Exception as e:
+        app.logger.warning(f"Failed to prepare email: {e}")
 
 
 
