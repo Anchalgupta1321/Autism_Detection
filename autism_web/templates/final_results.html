@@ -104,6 +104,28 @@
         }
         .btn-print:hover { background: #e2e8f0; color: var(--dark-text); }
 
+        @media print {
+            body {
+                background: white !important;
+                padding: 0 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .top-action-bar {
+                display: none !important;
+            }
+            .report-wrapper {
+                box-shadow: none !important;
+                max-width: 100% !important;
+                padding: 20px !important;
+                border-radius: 0 !important;
+            }
+            .verdict-banner, .breakdown-grid, .radar-container, .timeline-container, .gradcam-container {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+        }
+
         /* Report Header */
         .report-header {
             text-align: center;
@@ -721,20 +743,51 @@
         }
 
         function shareReportLink() {
-            const url = window.location.href;
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(url).then(() => {
-                    alert("🔗 Report link copied to clipboard! You can share this link with your pediatrician or specialist.");
-                }).catch(() => {
-                    prompt("Copy this assessment URL for your doctor:", url);
+            const childName = "{{ child_name | default('Child') }}";
+            const prediction = "{{ final_prediction | default('High Likelihood') }}";
+            const shareText = `AutoDetect AI Clinical Report for ${childName}: Diagnostic Consensus Verdict - ${prediction}. Download the full visual PDF report or forward the clinical summary email to share with your pediatrician.`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: `Diagnostic Report - ${childName}`,
+                    text: shareText,
+                    url: window.location.href
+                }).catch(() => {});
+            } else if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(shareText).then(() => {
+                    alert("📋 Assessment Summary copied to clipboard!\n\n💡 Tip: To send full visual reports (including Grad-CAM heatmaps & charts) to your doctor, please click 'Download PDF Report' and send the PDF file!");
                 });
             } else {
-                prompt("Copy this assessment URL for your doctor:", url);
+                alert("💡 Tip: Use the 'Download PDF Report' button to save and email the complete visual report (with charts & Grad-CAM heatmaps) to your doctor!");
             }
         }
 
         function downloadPDF() {
-            window.location.href = '/download-pdf-report';
+            const element = document.querySelector('.report-wrapper');
+            const topBar = document.querySelector('.top-action-bar');
+            
+            // Hide action bar during capture
+            if (topBar) topBar.style.display = 'none';
+
+            const childName = "{{ child_name | default('Child') }}".replace(/\s+/g, '_');
+            const opt = {
+                margin:       [0.2, 0.2, 0.2, 0.2],
+                filename:     `ASD_Assessment_Full_Report_${childName}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true, logging: false },
+                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+
+            if (typeof html2pdf !== 'undefined') {
+                html2pdf().set(opt).from(element).save().then(() => {
+                    if (topBar) topBar.style.display = 'flex';
+                }).catch(() => {
+                    if (topBar) topBar.style.display = 'flex';
+                    window.location.href = '/download-pdf-report';
+                });
+            } else {
+                window.location.href = '/download-pdf-report';
+            }
         }
 
         // Render Charts
