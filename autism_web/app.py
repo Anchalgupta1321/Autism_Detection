@@ -11,6 +11,7 @@ import secrets # For generating a strong secret key
 from flask_session import Session
 from flask_mail import Mail, Message
 import torch
+torch.set_num_threads(2)
 from torchvision import models, transforms
 import cv2
 from PIL import Image
@@ -108,12 +109,16 @@ class CNNLSTM(nn.Module):
 
     def forward(self, x):  # x: [B, T, 3, 224, 224]
         B, T, C, H, W = x.size()
-        x = x.view(B * T, C, H, W)
-        with torch.no_grad():
-            feats = self.cnn(x).squeeze()
-        feats = feats.view(B, T, -1)
+        frame_feats = []
+        for t in range(T):
+            single_frame = x[:, t, :, :, :]
+            with torch.no_grad():
+                f = self.cnn(single_frame)
+                f = f.view(B, -1)
+                frame_feats.append(f)
+        feats = torch.stack(frame_feats, dim=1)
         _, (hn, _) = self.lstm(feats)
-        hn_last_layer = hn[-1].squeeze(0)
+        hn_last_layer = hn[-1]
         out = self.fc(hn_last_layer)
         return torch.sigmoid(out).view(-1)
 
