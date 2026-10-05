@@ -621,12 +621,14 @@ def home():
     session.clear()
     return render_template('index.html')
 
-@app.route('/start-questionnaire', methods=['POST'])
+@app.route('/start-questionnaire', methods=['GET', 'POST'])
 def start_questionnaire():
     """
     Collects initial child and parent information and initializes the session.
     Redirects to the first step of the questionnaire.
     """
+    if request.method == 'GET':
+        return redirect(url_for('home'))
     child_name = request.form.get('child_name')
     child_age = request.form.get('child_age')
     gender = request.form.get('gender')
