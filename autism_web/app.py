@@ -436,7 +436,8 @@ def serve_upload(filename):
 def generate_pdf_report_bytes(user_info, final_prediction, questionnaire_risk_category, red_flags_count,
                               video_analysis_outcome, video_analysis_reason,
                               audio_analysis_outcome, audio_analysis_reason,
-                              explanation_summary, flagged_questions_details):
+                              explanation_summary, flagged_questions_details,
+                              domain_scores=None, history_timeline=None):
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=36, leftMargin=36, topMargin=36, bottomMargin=36)
     styles = getSampleStyleSheet()
@@ -551,26 +552,26 @@ def generate_pdf_report_bytes(user_info, final_prediction, questionnaire_risk_ca
     story.append(meta_table)
     story.append(Spacer(1, 14))
 
-    story.append(Paragraph('Multimodal Assessment Breakdown', h2_style))
+    story.append(Paragraph('1. Multimodal Assessment Breakdown', h2_style))
     modality_data = [
         [Paragraph('<b>Modality</b>', body_style), Paragraph('<b>Outcome</b>', body_style), Paragraph('<b>Clinical Findings</b>', body_style)],
         [
-            Paragraph('1. Behavioral Questionnaire', body_style),
+            Paragraph('Behavioral Questionnaire', body_style),
             Paragraph(f"<b>{questionnaire_risk_category}</b>", body_style),
-            Paragraph(f"Identified {red_flags_count} red flags across 5 domains.", body_style)
+            Paragraph(f"Identified {red_flags_count} red flags across 5 developmental domains.", body_style)
         ],
         [
-            Paragraph('2. MobileNetV2-LSTM Video AI', body_style),
+            Paragraph('MobileNetV2-LSTM Video AI', body_style),
             Paragraph(f"<b>{video_analysis_outcome}</b>", body_style),
             Paragraph(f"{video_analysis_reason}", body_style)
         ],
         [
-            Paragraph('3. Acoustic Vocalization AI', body_style),
+            Paragraph('Acoustic Vocalization AI', body_style),
             Paragraph(f"<b>{audio_analysis_outcome}</b>", body_style),
             Paragraph(f"{audio_analysis_reason}", body_style)
         ]
     ]
-    modality_table = Table(modality_data, colWidths=[140, 130, 270])
+    modality_table = Table(modality_data, colWidths=[150, 120, 270])
     modality_table.setStyle(TableStyle([
         ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#0d9488')),
         ('TEXTCOLOR', (0,0), (-1,0), colors.white),
@@ -580,8 +581,48 @@ def generate_pdf_report_bytes(user_info, final_prediction, questionnaire_risk_ca
     story.append(modality_table)
     story.append(Spacer(1, 14))
 
+    if domain_scores:
+        story.append(Paragraph('2. 5-Domain Behavioral Risk Profile', h2_style))
+        domain_rows = [[Paragraph('<b>Developmental Domain</b>', body_style), Paragraph('<b>Domain Risk Score (%)</b>', body_style)]]
+        for dom, score in domain_scores.items():
+            domain_rows.append([Paragraph(dom, body_style), Paragraph(f"<b>{score}%</b>", body_style)])
+        domain_table = Table(domain_rows, colWidths=[300, 240])
+        domain_table.setStyle(TableStyle([
+            ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#0284c7')),
+            ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+            ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor('#cbd5e1')),
+            ('PADDING', (0,0), (-1,-1), 6),
+        ]))
+        story.append(domain_table)
+        story.append(Spacer(1, 14))
+
+    if history_timeline:
+        story.append(Paragraph('3. Longitudinal Child Development Progress Tracker', h2_style))
+        hist_rows = [[Paragraph('<b>Re-Evaluation Checkpoint</b>', body_style), Paragraph('<b>Red Flags Count</b>', body_style), Paragraph('<b>Risk Classification</b>', body_style)]]
+        for h in history_timeline:
+            hist_rows.append([
+                Paragraph(h.get('checkpoint', ''), body_style),
+                Paragraph(str(h.get('red_flags', '')), body_style),
+                Paragraph(f"<b>{h.get('risk', '')}</b>", body_style)
+            ])
+        hist_table = Table(hist_rows, colWidths=[200, 140, 200])
+        hist_table.setStyle(TableStyle([
+            ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#f1f5f9')),
+            ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor('#e2e8f0')),
+            ('PADDING', (0,0), (-1,-1), 6),
+        ]))
+        story.append(hist_table)
+        story.append(Spacer(1, 14))
+
+    story.append(Paragraph('4. Explainable AI (Grad-CAM) Feature Attribution', h2_style))
+    xai_text = "<b>Neural Model:</b> MobileNetV2 (Spatial Feature Extractor) + LSTM (Temporal Sequence Classifier)<br/>" \
+               "<b>Grad-CAM Target Layer:</b> Final Convolutional Feature Map Layer (1280-dim)<br/>" \
+               "<b>Visual Attribution:</b> Gradient-Weighted Class Activation Heatmaps project visual spatial heatmaps onto frame sequences, highlighting upper body motion, rotational stimming, and pose features."
+    story.append(Paragraph(xai_text, body_style))
+    story.append(Spacer(1, 14))
+
     if flagged_questions_details:
-        story.append(Paragraph('Identified Behavioral Red Flags', h2_style))
+        story.append(Paragraph('5. Detailed Behavioral Red Flags', h2_style))
         flag_rows = [[Paragraph('<b>Domain</b>', body_style), Paragraph('<b>Flagged Question & Clinical Context</b>', body_style)]]
         for f in flagged_questions_details:
             flag_rows.append([
@@ -597,10 +638,10 @@ def generate_pdf_report_bytes(user_info, final_prediction, questionnaire_risk_ca
         story.append(flag_table)
         story.append(Spacer(1, 14))
 
-    rec_text = "<b>Recommended Next Steps:</b><br/>" \
+    rec_text = "<b>Recommended Next Steps for Caregivers:</b><br/>" \
                "• Consult a Pediatrician or Developmental Specialist for a formal ADOS-2 evaluation.<br/>" \
-               "• Explore early Speech & Occupational Therapy options.<br/><br/>" \
-               "<b>Medical Disclaimer:</b> AutoDetect AI is a decision-support screening tool, not a medical diagnosis."
+               "• Explore early Speech & Occupational Therapy options to maximize neuroplastic benefits.<br/><br/>" \
+               "<b>Medical Disclaimer:</b> AutoDetect AI is an automated screening & decision-support tool, not a medical diagnosis."
     story.append(Paragraph(rec_text, body_style))
 
     doc.build(story)
@@ -971,13 +1012,17 @@ def show_combined_results():
             audio_analysis_outcome=session.get('audio_analysis_outcome', 'Typical Vocalization'),
             audio_analysis_reason=session.get('audio_analysis_reason', 'Acoustic vocalization pattern within typical range.'),
             explanation_summary=explanation_summary,
-            flagged_questions_details=flagged_questions_details
+            flagged_questions_details=flagged_questions_details,
+            domain_scores=session.get('domain_scores', {}),
+            history_timeline=history_timeline
         )
         child_filename_clean = user_info.get('child_name', 'Child').replace(' ', '_')
         pdf_name = f"ASD_Assessment_{child_filename_clean}.pdf"
         send_report_email(to_email, subject, report_html, pdf_bytes=pdf_bytes, pdf_filename=pdf_name)
     except Exception as e:
         app.logger.warning(f"Failed to send email with PDF attachment: {e}")
+
+    email_sent = bool(app.config.get('MAIL_PASSWORD'))
 
     return render_template("final_results.html",
                            final_prediction=final_prediction,
@@ -997,7 +1042,8 @@ def show_combined_results():
                            domain_scores=session.get('domain_scores', {}),
                            audio_analysis_outcome=session.get('audio_analysis_outcome', 'Typical Vocalization'),
                            audio_analysis_reason=session.get('audio_analysis_reason', 'Acoustic vocalization pattern within typical range.'),
-                           history_timeline=history_timeline)
+                           history_timeline=history_timeline,
+                           email_sent=email_sent)
 
 @app.route('/download-pdf-report', methods=['GET'])
 def download_pdf_report_route():
@@ -1026,7 +1072,9 @@ def download_pdf_report_route():
         audio_analysis_outcome=audio_analysis_outcome,
         audio_analysis_reason=audio_analysis_reason,
         explanation_summary=explanation_summary,
-        flagged_questions_details=flagged_questions_details
+        flagged_questions_details=flagged_questions_details,
+        domain_scores=session.get('domain_scores', {}),
+        history_timeline=session.get('assessment_history', [])
     )
 
     child_clean = user_info.get('child_name', 'Child').replace(' ', '_')

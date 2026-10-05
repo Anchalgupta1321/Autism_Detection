@@ -489,7 +489,13 @@
             </div>
             <div class="meta-card">
                 <h4>Report Email Status</h4>
-                <p><i class="fa-solid fa-paper-plane" style="color: var(--primary);"></i> Dispatched to Inbox</p>
+                <p>
+                {% if email_sent %}
+                    <i class="fa-solid fa-paper-plane" style="color: var(--primary);"></i> Dispatched to Inbox
+                {% else %}
+                    <i class="fa-solid fa-file-arrow-down" style="color: var(--primary);"></i> Ready for Download
+                {% endif %}
+                </p>
             </div>
         </div>
 
