@@ -679,7 +679,7 @@ def send_report_email(to_email, subject, report_html, pdf_bytes=None, pdf_filena
                 except Exception as e:
                     app_obj.logger.warning(f"Async email error: {e}")
 
-        threading.Thread(target=_async_send, args=(app._get_current_object(), msg)).start()
+        threading.Thread(target=_async_send, args=(app, msg)).start()
     except Exception as e:
         app.logger.warning(f"Failed to prepare email: {e}")
 
