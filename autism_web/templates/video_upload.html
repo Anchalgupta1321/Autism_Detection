@@ -499,14 +499,25 @@
                     <span>Analyze Video with AI</span>
                 </button>
             </div>
+            <!-- Inline Neural Analysis Progress Card -->
+            <div class="inline-progress-card" id="inline-progress" style="display: none; margin-top: 24px; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 16px; padding: 24px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
+                <div style="display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 12px;">
+                    <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 1.8rem; color: #0d9488;"></i>
+                    <h3 style="font-size: 1.15rem; font-weight: 800; color: #0f172a;">AI Behavioral Neural Analysis in Progress</h3>
+                </div>
+                <p id="status-step" style="font-size: 0.9rem; color: #475569; margin-bottom: 16px; font-weight: 600;">
+                    Extracting spatio-temporal video frames...
+                </p>
+                <!-- Progress Bar -->
+                <div style="width: 100%; background: #e2e8f0; height: 10px; border-radius: 10px; overflow: hidden; margin-bottom: 8px;">
+                    <div id="progress-bar-fill" style="width: 15%; height: 100%; background: linear-gradient(90deg, #0d9488, #0284c7); transition: width 0.4s ease;"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #64748b; font-weight: 700;">
+                    <span>MobileNetV2 + LSTM Engine</span>
+                    <span id="progress-percent">15%</span>
+                </div>
+            </div>
         </form>
-    </div>
-
-    <!-- Processing Overlay -->
-    <div class="overlay" id="processing-overlay">
-        <div class="spinner"></div>
-        <h2 style="font-size: 1.6rem; font-weight: 800; margin-bottom: 8px;">Analyzing Behavioral Video...</h2>
-        <p style="font-size: 0.95rem; color: #cbd5e1; max-width: 480px;" id="status-step">Uniformly sampling 16 keyframes for MobileNetV2 spatial feature extraction...</p>
     </div>
 
     <script>
@@ -659,7 +670,7 @@
             }
         }
 
-        // Form Submit Validation & Processing Overlay
+        // Form Submit Validation & Inline Progress Card
         uploadForm.addEventListener('submit', function(e) {
             if (!hiddenFileInput.files || hiddenFileInput.files.length === 0) {
                 e.preventDefault();
@@ -667,20 +678,34 @@
                 return;
             }
 
-            overlay.style.display = 'flex';
+            const inlineProgress = document.getElementById('inline-progress');
+            const submitBtn = document.getElementById('submit-btn');
+            const progressFill = document.getElementById('progress-bar-fill');
+            const progressPercent = document.getElementById('progress-percent');
+
+            // Show inline progress card and update button
+            inlineProgress.style.display = 'block';
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> <span>Analyzing Video with AI...</span>';
+
+            // Smooth scroll down to progress card
+            inlineProgress.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
             const steps = [
-                "Uniformly sampling 16 keyframes from video tensor...",
-                "Running MobileNetV2 spatial feature extraction (1280-dim)...",
-                "Evaluating temporal sequence across frames with LSTM...",
-                "Computing Grad-CAM explainability heatmaps..."
+                { text: "Uniformly sampling 16 keyframes from video tensor...", pct: "35%" },
+                { text: "Running MobileNetV2 spatial feature extraction (1280-dim)...", pct: "60%" },
+                { text: "Evaluating temporal sequence across frames with LSTM...", pct: "85%" },
+                { text: "Computing Grad-CAM explainability heatmaps...", pct: "98%" }
             ];
             let idx = 0;
             setInterval(() => {
                 if (idx < steps.length) {
-                    statusStep.textContent = steps[idx];
+                    statusStep.textContent = steps[idx].text;
+                    progressFill.style.width = steps[idx].pct;
+                    progressPercent.textContent = steps[idx].pct;
                     idx++;
                 }
-            }, 1800);
+            }, 1200);
         });
     </script>
 </body>
